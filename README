@@ -1,0 +1,52 @@
+This is a python lib, building german names for very big numbers; together with a console application, using it.
+See http://de.wikipedia.org/wiki/Zahlennamen#Nomenklatur_f.C3.BCr_Zahlen_ab_1_000_000 for details.
+
+Usage
+=====
+
+say.py [-h] [--byLine] [--latinOnly] [--zeros] [--random] number
+
+Write german names of (very) big numbers, using long ladder system.
+
+positional arguments:
+  number       The number to say.
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --byLine     Write components line by line.
+  --latinOnly  Say "123 millionen" instead of
+               "einhundertdreiundzwanzigmillionen"
+  --zeros      Do not say given number, but the number with that many zeros.
+  --random     Do not say given number, but a random number with that many
+               digits.
+
+
+say.py does also show, how to use the lib.
+
+Examples
+========
+say.py 9999999345349583045894
+neuntrilliardenneunhundertneunundneunzigtrillionenneunhundertneunundneunzigbilli
+ardendreihundertf³nfundvierzigbillionendreihundertneunundvierzigmilliardenf³nfhu
+ndertdreiundachtzigmillionenf³nfundvierzigtausendachthundertvierundneunzig
+
+say.py --zeros 1000000
+10 sesexagintazentillisesexagintaseszentilliarden
+
+say.py --random --byLine --latinOnly 6400
+7 dezillisesexagintaseszentilliarden
+536 dezillisesexagintaseszentillionen
+866 dezilliquinquasexagintaseszentilliarden
+799 dezilliquinquasexagintaseszentillionen
+209 dezilliquattuorsexagintaseszentilliarden
+71 dezilliquattuorsexagintaseszentillionen
+773 dezillitresexagintaseszentilliarden
+806 dezillitresexagintaseszentillionen
+802 dezilliduosexagintaseszentilliarden
+137 dezilliduosexagintaseszentillionen
+...
+
+say.py --zeros 9999999345349583045894
+100 millisesexagintaseszentillisesexagintaseszentilliseptenquinquagintaquingenti
+llioktoquinquagintaquingentillitresexagintaduzentilliquadragintaoktingentilliduo
+oktogintanongentillionen
