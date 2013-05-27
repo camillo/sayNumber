@@ -4,26 +4,10 @@ import os
 # German has a lot of exceptions during the first 20 numbers, so easiest thing is
 # to collect them in a dict, instead of writing special code.
 SMALL_NUMBERS = {
-    '0': 'null',
-    '1': 'eins',
-    '2': 'zwei',
-    '3': 'drei',
-    '4': 'vier',
-    '5': 'fünf',
-    '6': 'sechs',
-    '7': 'sieben',
-    '8': 'acht',
-    '9': 'neun',
-    '10': 'zehn',
-    '11': 'elf',
-    '12': 'zwölf',
-    '13': 'dreizehn',
-    '14': 'vierzehn',
-    '15': 'fünfzehn',
-    '16': 'sechszehn',
-    '17': 'siebzehn',
-    '18': 'achtzehn',
-    '19': 'neunzehn'}
+    '0': 'null',      '1': 'eins',       '2': 'zwei',       '3': 'drei',      '4': 'vier',
+    '5': 'fünf',      '6': 'sechs',      '7': 'sieben',     '8': 'acht',      '9': 'neun',
+    '10': 'zehn',     '11': 'elf',       '12': 'zwölf',     '13': 'dreizehn', '14': 'vierzehn',
+    '15': 'fünfzehn', '16': 'sechszehn', '17': 'siebzehn',  '18': 'achtzehn', '19': 'neunzehn'}
 
 # These are the prefixes to build latin numbers.
 # @see http://de.wikipedia.org/wiki/Zahlennamen#Nomenklatur_f.C3.BCr_Zahlen_ab_1_000_000 for details.
@@ -32,13 +16,13 @@ LATIN_PREFIXES = [
     ['mi', 'bi', 'tri', 'quadri', 'quinti', 'sexti', 'septi', 'okti', 'noni'],
     # 1: list of one-prefixes, that needs to get combined with a ten or hundred prefix.
     [['un', ], ['duo', ], ['tre', 's'], ['quattuor', ], ['quinqua', ],
-     ['se', 's', 'x'], ['septe', 'm', 'n'], ['okto', ], ['nove', 'm', 'n']],
+    ['se', 's', 'x'], ['septe', 'm', 'n'], ['okto', ], ['nove', 'm', 'n']],
     # 2: list of ten-prefixes
     [['dezi', 'n'], ['viginti', 'm', 's'], ['triginta', 'n', 's'], ['quadraginta', 'n', 's'],
-     ['quinquaginta', 'n', 's'], ['sexaginta', 'n'], ['septuaginta', 'n'], ['oktoginta', 'm', 'x'], ['nonaginta', ]],
+    ['quinquaginta', 'n', 's'], ['sexaginta', 'n'], ['septuaginta', 'n'], ['oktoginta', 'm', 'x'], ['nonaginta', ]],
     # 3: list of hundred prefixes
-    [['zenti', 'n', 'x'], ['duzenti', 'n'], ['trezenti', 'n', 's'], ['quadringenti', 'n', 's'], ['quingenti', 'n', 's'],
-     ['seszenti', 'n'], ['septingenti', 'n'], ['oktingenti', 'm', 'x'], ['nongenti', ]]
+    [['zenti', 'n', 'x'], ['duzenti', 'n'], ['trezenti', 'n', 's'], ['quadringenti', 'n', 's'],
+    ['quingenti', 'n', 's'], ['seszenti', 'n'], ['septingenti', 'n'], ['oktingenti', 'm', 'x'], ['nongenti', ]]
 ]
 
 
@@ -59,13 +43,13 @@ DECI_EXCEPTIONS = {
 }
 
 
-def sayLatin(number):
+def _sayLatin(number):
     """
     Build the latin word for given number.
-    @param number an number from 1 to 999.
+    @param number from 1 to 999.
     @return The latin word for given number.
     """
-    if number < 1 or number > 999:
+    if not 0 < number < 1000:
         raise ValueError("Number must be 1-999.")
 
     def combineOnePrefix(one, other):
@@ -86,7 +70,6 @@ def sayLatin(number):
     ten = currentNumber % 100
     hundred = currentNumber - ten
 
-    #TODO: I did not find something better, but there MUST be a more elegant way of combining the prefixes.
     if ten == 0 and hundred == 0:
         return LATIN_PREFIXES[0][one - 1]
     if one == 0:
@@ -103,7 +86,7 @@ def sayLatin(number):
     return ret + LATIN_PREFIXES[3][hundred / 100 - 1][0] if hundred > 0 else ret
 
 
-def sayLongLadder(zeros, plural=False):
+def _sayLongLadder(zeros, plural=False):
     """
     Build the word for the number, starting with a 1, followed by as many 0 as specified in zeros.
     @param zeros the number of "0", following the "1". Must be 6 at least and zeros % 3 == 0.
@@ -123,16 +106,16 @@ def sayLongLadder(zeros, plural=False):
             # This is the prefix for 000
             prefix = "ni"
         else:
-            prefix = sayLatin(current)
+            prefix = _sayLatin(current)
             # If we combine a ten prefix, without a hundred prefix, the 'a' changes to 'i' if present at last position.
             if 100 > current > 9 and prefix[-1] == "a":
                 prefix = prefix[:-1] + 'i'
             sixes -= current
-        sixes /= 1000
         # This is the prefix for separating the thousand blocks. We skip this, if this is the firs iteration.
         if ret:
             prefix += "lli"
         ret = prefix + ret
+        sixes /= 1000
     # Now add the postfix to make a word.
     if lliarde:
         ret += "lliarde"
@@ -140,9 +123,7 @@ def sayLongLadder(zeros, plural=False):
     else:
         ret += "llion"
         pluralPostfix = "en"
-    if plural:
-        ret += pluralPostfix
-    return ret
+    return ret + pluralPostfix if plural else ret
 
 
 def sayByExp(zeros, plural=False):
@@ -159,7 +140,7 @@ def sayByExp(zeros, plural=False):
     elif zeros == 3:
         ret = "tausend"
     else:
-        ret = sayLongLadder(zeros, plural)
+        ret = _sayLongLadder(zeros, plural)
     return ret
 
 
@@ -172,7 +153,7 @@ def _sayShortNumber(shortNumber, componentsLeft):
     return SMALL_NUMBERS[shortNumber]
 
 
-def _say999(number, componentsLeft):
+def _sayGerman(number, componentsLeft):
     """
     Helper to build the german word for given number.
     @param number Must be 0-999.
@@ -187,7 +168,7 @@ def _say999(number, componentsLeft):
     if currentLen == 3:
         if not number[0] == "0":
             ret = _sayShortNumber(number[0], 2) + "hundert"
-        return ret + _say999(number[1:], componentsLeft)
+        return ret + _sayGerman(number[1:], componentsLeft)
 
     if number[0] == "0":
         if number[1] == "0":
@@ -219,7 +200,7 @@ def _split(number):
 def say(number, byLine=False, latinOnly=False):
     """
     Build the german world for given number, using the long ladder system.
-    @param number The number to build.
+    @param number The number to build (can be a string or int).
     @param byLine True, if a \n should be added between the parts of the spoken word.
     @param latinOnly If True build "123 millionen"; "einhundertdreiundzwanzingmillionen" otherwise.
     @return the german word for given number.
@@ -242,7 +223,7 @@ def say(number, byLine=False, latinOnly=False):
                 if componentsLeft > 1:
                     ret += " "
             else:
-                ret += _say999(currentComponent, componentsLeft)
+                ret += _sayGerman(currentComponent, componentsLeft)
             if componentsLeft > 1:
                 ret += sayByExp((componentsLeft - 1) * 3, plural=int(currentComponent) > 1)
             if byLine:

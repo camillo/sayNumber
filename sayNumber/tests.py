@@ -1,6 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 import unittest
-from german import say, _split, sayLatin, sayLongLadder
+from german import say, _split, _sayLatin, _sayLongLadder
 
 
 class TestInternal(unittest.TestCase):
@@ -31,7 +31,7 @@ class TestInternal(unittest.TestCase):
     def testLatinConsistence(self):
         numbers = []
         for current in range(1, 1000):
-            currentNumber = sayLatin(current)
+            currentNumber = _sayLatin(current)
             if currentNumber in numbers:
                 self.fail("%s already in list [%s]" % (currentNumber, current))
             numbers.append(currentNumber)
@@ -174,65 +174,65 @@ class TestE6ToE18(unittest.TestCase):
 class TestLatin(unittest.TestCase):
 
     def testOnes(self):
-        self.assertEqual('mi', sayLatin(1))
-        self.assertEqual('bi', sayLatin(2))
-        self.assertEqual('tri', sayLatin(3))
-        self.assertEqual('quadri', sayLatin(4))
-        self.assertEqual('quinti', sayLatin(5))
-        self.assertEqual('sexti', sayLatin(6))
-        self.assertEqual('septi', sayLatin(7))
-        self.assertEqual('okti', sayLatin(8))
-        self.assertEqual('noni', sayLatin(9))
+        self.assertEqual('mi', _sayLatin(1))
+        self.assertEqual('bi', _sayLatin(2))
+        self.assertEqual('tri', _sayLatin(3))
+        self.assertEqual('quadri', _sayLatin(4))
+        self.assertEqual('quinti', _sayLatin(5))
+        self.assertEqual('sexti', _sayLatin(6))
+        self.assertEqual('septi', _sayLatin(7))
+        self.assertEqual('okti', _sayLatin(8))
+        self.assertEqual('noni', _sayLatin(9))
 
     def testTens(self):
-        self.assertEqual('dezi', sayLatin(10))
-        self.assertEqual('viginti', sayLatin(20))
-        self.assertEqual('triginta', sayLatin(30))
-        self.assertEqual('quadraginta', sayLatin(40))
-        self.assertEqual('quinquaginta', sayLatin(50))
-        self.assertEqual('sexaginta', sayLatin(60))
-        self.assertEqual('septuaginta', sayLatin(70))
-        self.assertEqual('oktoginta', sayLatin(80))
-        self.assertEqual('nonaginta', sayLatin(90))
+        self.assertEqual('dezi', _sayLatin(10))
+        self.assertEqual('viginti', _sayLatin(20))
+        self.assertEqual('triginta', _sayLatin(30))
+        self.assertEqual('quadraginta', _sayLatin(40))
+        self.assertEqual('quinquaginta', _sayLatin(50))
+        self.assertEqual('sexaginta', _sayLatin(60))
+        self.assertEqual('septuaginta', _sayLatin(70))
+        self.assertEqual('oktoginta', _sayLatin(80))
+        self.assertEqual('nonaginta', _sayLatin(90))
 
     def testHundert(self):
-        self.assertEqual('zenti', sayLatin(100))
-        self.assertEqual('duzenti', sayLatin(200))
-        self.assertEqual('trezenti', sayLatin(300))
-        self.assertEqual('quadringenti', sayLatin(400))
-        self.assertEqual('quingenti', sayLatin(500))
-        self.assertEqual('seszenti', sayLatin(600))
-        self.assertEqual('septingenti', sayLatin(700))
-        self.assertEqual('oktingenti', sayLatin(800))
-        self.assertEqual('nongenti', sayLatin(900))
+        self.assertEqual('zenti', _sayLatin(100))
+        self.assertEqual('duzenti', _sayLatin(200))
+        self.assertEqual('trezenti', _sayLatin(300))
+        self.assertEqual('quadringenti', _sayLatin(400))
+        self.assertEqual('quingenti', _sayLatin(500))
+        self.assertEqual('seszenti', _sayLatin(600))
+        self.assertEqual('septingenti', _sayLatin(700))
+        self.assertEqual('oktingenti', _sayLatin(800))
+        self.assertEqual('nongenti', _sayLatin(900))
 
     def testOnePrefixes(self):
-        self.assertEqual('duoquadraginta', sayLatin(42))
-        self.assertEqual('sesviginti', sayLatin(26))
-        self.assertEqual('septensexaginta', sayLatin(67))
-        self.assertEqual('sesquadringenti', sayLatin(406))
-        self.assertEqual('sesexagintaseszenti', sayLatin(666))
+        self.assertEqual('duoquadraginta', _sayLatin(42))
+        self.assertEqual('sesviginti', _sayLatin(26))
+        self.assertEqual('septensexaginta', _sayLatin(67))
+        self.assertEqual('sesquadringenti', _sayLatin(406))
+        self.assertEqual('sesexagintaseszenti', _sayLatin(666))
 
     def testOther(self):
-        self.assertEqual('dezizenti', sayLatin(110))
+        self.assertEqual('dezizenti', _sayLatin(110))
 
-    def testQuindezi(self):
-        self.assertEqual('quindezi', sayLatin(15))
-
-    def testTreszenti(self):
-        self.assertEqual('treszenti', sayLatin(103))
+    def testOneExceptions(self):
+        self.assertEqual('quindezi', _sayLatin(15))
+        self.assertEqual('treszenti', _sayLatin(103))
 
 
 class LongLadderTest(unittest.TestCase):
     def test6000(self):
-        self.assertEqual('millinillion', sayLongLadder(6000))
-        self.assertEqual('millinillinillion', sayLongLadder(6000000))
-        self.assertEqual('millinillinilliarde', sayLongLadder(6000003))
-        self.assertEqual('nonillinovenonagintanongentillion', sayLongLadder(59994))
-        self.assertEqual('million', sayLongLadder(6))
-        self.assertEqual('millionen', sayLongLadder(6, True))
-        self.assertEqual('milliarde', sayLongLadder(9))
-        self.assertEqual('milliarden', sayLongLadder(9, True))
+        self.assertEqual('millinillion', _sayLongLadder(6000))
+        self.assertEqual('millinillinillion', _sayLongLadder(6000000))
+        self.assertEqual('millinillinilliarde', _sayLongLadder(6000003))
+        self.assertEqual('nonillinovenonagintanongentillion', _sayLongLadder(59994))
+
+    def testWordPrefix(self):
+        self.assertEqual('million', _sayLongLadder(6))
+        self.assertEqual('millionen', _sayLongLadder(6, True))
+        self.assertEqual('milliarde', _sayLongLadder(9))
+        self.assertEqual('milliarden', _sayLongLadder(9, True))
 
     def testTenWithoutHundred(self):
-        self.assertEqual('trigintillion', sayLongLadder(180))
+        self.assertEqual('trigintillion', _sayLongLadder(180))
