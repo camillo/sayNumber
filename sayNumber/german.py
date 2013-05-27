@@ -9,6 +9,15 @@ SMALL_NUMBERS = {
     '10': 'zehn',     '11': 'elf',       '12': 'zwölf',     '13': 'dreizehn', '14': 'vierzehn',
     '15': 'fünfzehn', '16': 'sechszehn', '17': 'siebzehn',  '18': 'achtzehn', '19': 'neunzehn'}
 
+
+# These are exceptions, building german 2 digit numbers like 72.
+DECI_EXCEPTIONS = {
+    '2': 'zwan',
+    '6': 'sech',
+    '7': 'sieb'
+}
+
+
 # These are the prefixes to build latin numbers.
 # @see http://de.wikipedia.org/wiki/Zahlennamen#Nomenklatur_f.C3.BCr_Zahlen_ab_1_000_000 for details.
 LATIN_PREFIXES = [
@@ -32,14 +41,6 @@ LATIN_PREFIXES = [
 COMBINE_EXCEPTIONS = {
     'quinquadezi': 'quindezi',
     'trezenti': 'treszenti'
-}
-
-
-# These are exceptions, building german 2 digit numbers like 72.
-DECI_EXCEPTIONS = {
-    '2': 'zwan',
-    '6': 'sech',
-    '7': 'sieb'
 }
 
 
