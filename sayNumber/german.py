@@ -51,7 +51,7 @@ COMBINE_EXCEPTIONS = {
 }
 
 
-# These are exceptions, building 2 digit numbers like 72.
+# These are exceptions, building german 2 digit numbers like 72.
 DECI_EXCEPTIONS = {
     '2': 'zwan',
     '6': 'sech',
@@ -145,7 +145,7 @@ def sayLongLadder(zeros, plural=False):
     return ret
 
 
-def sayByExp(zeros, plural):
+def sayByExp(zeros, plural=False):
     """
     Build the word for the number, starting with a 1, followed by as many "0" as specified in zeros.
     @param zeros the number of "0", following the "1". Must be 3 at least and zeros % 3 == 0.
@@ -163,13 +163,6 @@ def sayByExp(zeros, plural):
     return ret
 
 
-def _sayDeci(digit):
-    """
-    Helper to build the german tens.
-    """
-    return DECI_EXCEPTIONS.get(digit, SMALL_NUMBERS[digit]) + "zig"
-
-
 def _sayShortNumber(shortNumber, componentsLeft):
     """
     Helper to say a short number, that is used before another part (zwanzig millionen or eine million or ein tausend)
@@ -184,6 +177,9 @@ def _say999(number, componentsLeft):
     Helper to build the german word for given number.
     @param number Must be 0-999.
     """
+    if not 0 <= int(number) <= 999:
+        raise ValueError("Number must be 0-999")
+    number = str(number)
     if number in SMALL_NUMBERS:
         return _sayShortNumber(number, componentsLeft)
     currentLen = len(number)
@@ -199,7 +195,7 @@ def _say999(number, componentsLeft):
         return SMALL_NUMBERS[number[1]]
     if not number[1] == "0":
         ret = _sayShortNumber(number[1], 2) + "und"
-    ret += _sayDeci(number[0])
+    ret += DECI_EXCEPTIONS.get(number[0], SMALL_NUMBERS[number[0]]) + "zig"
     return ret
 
 
