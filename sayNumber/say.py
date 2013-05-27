@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 import argparse
 import random
@@ -47,3 +47,4 @@ if __name__ == "__main__":
         main(args)
     except Exception as ex:
         print ex.message
+
