@@ -26,7 +26,7 @@ def main(args):
         ret = say(randomNumber, byLine=args.byLine, latinOnly=args.latinOnly)
     else:
         ret = say(number, byLine=args.byLine, latinOnly=args.latinOnly)
-    print ret.decode(args.encoding)
+    print ret.decode('latin-1')
 
 
 if __name__ == "__main__":
@@ -39,8 +39,6 @@ if __name__ == "__main__":
                         help='Do not say given number, but the number with that many zeros.')
     parser.add_argument('--random', dest='random', action='store_true',
                         help='Do not say given number, but a random number with that many digits.')
-    parser.add_argument('--encoding', dest='encoding', action='store', default="latin-1",
-                        help='Use this encoding; default is latin-1')
     parser.add_argument('number', nargs=1, type=int, help='The number to say.')
 
     args = parser.parse_args()

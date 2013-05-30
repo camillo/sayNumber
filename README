@@ -6,7 +6,6 @@ Usage
 
 say.py --help
 usage: say.py [-h] [--byLine] [--latinOnly] [--zeros] [--random]
-              [--encoding ENCODING]
               number
 
 Write german names of (very) big numbers, using long ladder system.
@@ -23,7 +22,6 @@ optional arguments:
                        zeros.
   --random             Do not say given number, but a random number with that
                        many digits.
-  --encoding ENCODING  Use this encoding; default is latin-1
 say.py does also show, how to use the lib.
 
 Examples
