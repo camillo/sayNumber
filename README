@@ -5,24 +5,26 @@ Usage
 =====
 
 say.py --help
-usage: say.py [-h] [--byLine] [--latinOnly] [--zeros] [--random]
+usage: say.py [-h] [--byLine] [--latinOnly] [--zeros] [--random] [--numeric]
               number
 
 Write german names of (very) big numbers, using long ladder system.
 
 positional arguments:
-  number               The number to say.
+  number           The number to say.
 
 optional arguments:
-  -h, --help           show this help message and exit
-  --byLine             Write components line by line.
-  --latinOnly          Say "123 millionen" instead of
-                       "einhundertdreiundzwanzigmillionen"
-  --zeros              Do not say given number, but the number with that many
-                       zeros.
-  --random             Do not say given number, but a random number with that
-                       many digits.
-say.py does also show, how to use the lib.
+  -h, --help       show this help message and exit
+  --byLine, -b     Write components line by line.
+  --latinOnly, -l  Say "123 millionen" instead of
+                   "einhundertdreiundzwanzigmillionen"
+  --zeros, -z      Do not say given number, but the number with that many
+                   zeros.
+  --random, -r     Do not say given number, but a random number with that many
+                   digits.
+  --numeric, -n    Say the number also in numeric form.
+
+  say.py does also show, how to use the lib.
 
 Examples
 ========
