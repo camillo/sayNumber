@@ -1,3 +1,4 @@
+# -*- coding: iso-8859-1 -*-
 import unittest
 from german import say, _splitThousandBlocks, _sayLatin, _sayLongLadder
 
@@ -53,7 +54,7 @@ class TestTo12(unittest.TestCase):
         self.assertEqual(say('4'), 'vier')
 
     def test5isFuenf(self):
-        self.assertEqual(say('5'), 'f\xc3\xbcnf')
+        self.assertEqual(say('5'), 'fünf')
 
     def test6isSechs(self):
         self.assertEqual(say('6'), 'sechs')
@@ -74,7 +75,7 @@ class TestTo12(unittest.TestCase):
         self.assertEqual(say('11'), 'elf')
 
     def test12isZehn(self):
-        self.assertEqual(say('12'), 'zw\xc3\xb6lf')
+        self.assertEqual(say('12'), 'zwölf')
 
 
 class Test13To19(unittest.TestCase):
@@ -86,7 +87,7 @@ class Test13To19(unittest.TestCase):
         self.assertEqual(say('14'), 'vierzehn')
 
     def test15(self):
-        self.assertEqual(say('15'), 'f\xc3\xbcnfzehn')
+        self.assertEqual(say('15'), 'fünfzehn')
 
     def test16(self):
         self.assertEqual(say('16'), 'sechszehn')
@@ -116,7 +117,7 @@ class Test20To99(unittest.TestCase):
         self.assertEqual(say('62'), 'zweiundsechzig')
 
     def test75(self):
-        self.assertEqual(say('75'), 'f\xc3\xbcnfundsiebzig')
+        self.assertEqual(say('75'), 'fünfundsiebzig')
 
     def test80(self):
         self.assertEqual(say('80'), 'achtzig')

@@ -4,23 +4,26 @@ See http://de.wikipedia.org/wiki/Zahlennamen#Nomenklatur_f.C3.BCr_Zahlen_ab_1_00
 Usage
 =====
 
-say.py [-h] [--byLine] [--latinOnly] [--zeros] [--random] number
+say.py --help
+usage: say.py [-h] [--byLine] [--latinOnly] [--zeros] [--random]
+              [--encoding ENCODING]
+              number
 
 Write german names of (very) big numbers, using long ladder system.
 
 positional arguments:
-  number       The number to say.
+  number               The number to say.
 
 optional arguments:
-  -h, --help   show this help message and exit
-  --byLine     Write components line by line.
-  --latinOnly  Say "123 millionen" instead of
-               "einhundertdreiundzwanzigmillionen"
-  --zeros      Do not say given number, but the number with that many zeros.
-  --random     Do not say given number, but a random number with that many
-               digits.
-
-
+  -h, --help           show this help message and exit
+  --byLine             Write components line by line.
+  --latinOnly          Say "123 millionen" instead of
+                       "einhundertdreiundzwanzigmillionen"
+  --zeros              Do not say given number, but the number with that many
+                       zeros.
+  --random             Do not say given number, but a random number with that
+                       many digits.
+  --encoding ENCODING  Use this encoding; default is latin-1
 say.py does also show, how to use the lib.
 
 Examples

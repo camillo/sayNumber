@@ -1,12 +1,13 @@
+# -*- coding: iso-8859-1 -*-
 import os
 
 # German has a lot of exceptions during the first 20 numbers, so easiest thing is
 # to collect them in a dict, instead of writing special code.
 SMALL_NUMBERS = {
-    '0': 'null',             '1': 'eins',       '2': 'zwei',          '3': 'drei',      '4': 'vier',
-    '5': 'f\xc3\xbcnf',      '6': 'sechs',      '7': 'sieben',        '8': 'acht',      '9': 'neun',
-    '10': 'zehn',            '11': 'elf',       '12': 'zw\xc3\xb6lf', '13': 'dreizehn', '14': 'vierzehn',
-    '15': 'f\xc3\xbcnfzehn', '16': 'sechszehn', '17': 'siebzehn',     '18': 'achtzehn', '19': 'neunzehn'}
+    '0': 'null',      '1': 'eins',       '2': 'zwei',       '3': 'drei',      '4': 'vier',
+    '5': 'fünf',      '6': 'sechs',      '7': 'sieben',     '8': 'acht',      '9': 'neun',
+    '10': 'zehn',     '11': 'elf',       '12': 'zwölf',     '13': 'dreizehn', '14': 'vierzehn',
+    '15': 'fünfzehn', '16': 'sechszehn', '17': 'siebzehn',  '18': 'achtzehn', '19': 'neunzehn'}
 
 # These are exceptions, building german 2 digit numbers like 72.
 GERMAN_DEZI_EXCEPTIONS = {
