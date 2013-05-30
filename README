@@ -5,82 +5,91 @@ Usage
 =====
 
 say.py --help
-usage: say.py [-h] [-e] [-v] [-c] [-C] [-n] [-b] [-l] [-g] [-z | -r] number
+usage: say.py [-G] [-GG] [-h] [-e] [-v] [-c] [-C] [-n] [-f] [-b] [-l] [-g]
+              [-z | -r]
+              [number]
 
 Write german names of (very) big numbers.
 
-positional arguments:
-  number             the number to say
+chose one of these:
+  number             say this number
+  -G, --googol       say a googol (10^100)
+  -GG, --googolplex  say a googolplex (10^googol)
 
 help:
   -h, --help         show this help message and exit
   -e, --example      show examples and exit
   -v, --version      show program's version number and exit
   -c, --licence      show licence information and exit
-  -C, --fullLicence  show full licence and exit
+  -C, --fullLicence  show licence file and exit; tries to download and save licence, if not available
 
 optional arguments:
-  -n, --numeric      say the number also in numeric form
+  -n, --numeric      say the number also in numeric form; it is not recommended to use this option with more than 1.000.000 digits
+  -f, --force        ignore size warnings
 
 format:
   -b, --byLine       write components line by line
   -l, --latinOnly    say "123 millionen" instead of "einhundertdreiundzwanzigmillionen"
   -g, --grouping     group thousand blocks; implicit using -n
 
-building numbers:
+number:
   -z, --zeros        do not say given number, but the number with that many zeros
   -r, --random       do not say given number, but a random number with that many digits
 
 Examples
 ========
 
-say.py --example shows complete examples. Some here:
+say.py --example shows complete examples.
+
+say.py 123
+einhundertdreiundzwanzig
 
 say.py 9999999345349583045894
 neuntrilliardenneunhundertneunundneunzigtrillionenneunhundertneunundneunzigbilli
-ardendreihundertfünfundvierzigbillionendreihundertneunundvierzigmilliardenfünfhu
-ndertdreiundachtzigmillionenfünfundvierzigtausendachthundertvierundneunzig
+ardendreihundertf³nfundvierzigbillionendreihundertneunundvierzigmilliardenf³nfhu
+ndertdreiundachtzigmillionenf³nfundvierzigtausendachthundertvierundneunzig
+
+say.py --zeros 123
+vigintilliarde
 
 say.py --zeros 1000000
 10 sesexagintazentillisesexagintaseszentilliarden
-
-say.py --random --byLine --latinOnly 6400
-7 dezillisesexagintaseszentilliarden
-536 dezillisesexagintaseszentillionen
-866 dezilliquinquasexagintaseszentilliarden
-799 dezilliquinquasexagintaseszentillionen
-209 dezilliquattuorsexagintaseszentilliarden
-71 dezilliquattuorsexagintaseszentillionen
-773 dezillitresexagintaseszentilliarden
-806 dezillitresexagintaseszentillionen
-802 dezilliduosexagintaseszentilliarden
-137 dezilliduosexagintaseszentillionen
-...
 
 say.py --zeros 9999999345349583045894
 100 millisesexagintaseszentillisesexagintaseszentilliseptenquinquagintaquingenti
 llioktoquinquagintaquingentillitresexagintaduzentilliquadragintaoktingentilliduo
 oktogintanongentillionen
 
-a googol
-say.py --latinOnly 1000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000
-10 sedezilliarden
+say.py --random 123
+siebenhundertvierundsechzigvigintillioneneinhundertvierzignovendezilliardene ... izigtausenddreihundertvierzehn
 
-a googolplex
-say.py --zeros 10000000000000000000000000000000000000000000000000000000000000000
-000000000000000000000000000000000000
-10 millisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexa
-gintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentil
-lisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintas
-eszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisese
-xagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszent
-illisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagint
-aseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillise
-sexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintasesze
-ntillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagi
-ntaseszentilliarden
+say.py --random --latinOnly 123
+398 vigintillionen 249 novendezilliarden 87 novendezillionen 534 oktodezilliarden 809 oktodezillionen ...
+
+say.py --random --latinOnly --byLine 123
+923 vigintillionen
+910 novendezilliarden
+...
+
+say.py --random --latinOnly --numeric 123
+217764231953087899423934113226947903488766240424414874685303342506908446655767312941208736464299524772777802411207853347868
+217 vigintillionen 764 novendezilliarden 231 novendezillionen 953 oktodezilliarden 87 oktodezillionen ...
+
+say.py --random --latinOnly --numeric --grouping 123
+695.128.681.352.561.722.639.169 ...
+695 vigintillionen 128 novendezilliarden  ...
+
+say.py --googol --numeric --grouping
+10.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000
+zehnsedezilliarden
+
+say.py --googolplex
+10 millisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentil
+lisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisese
+xagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagint
+aseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintasesze
+ntillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentilliarden
 
 Copyright (C) 2013 Daniel Marohn - daniel.marohn@gmail.com
-This program is free software; find details in file LICENCE or here:
-http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+This program is free software; find details at sayNumber/LICENCE or here:
+https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
