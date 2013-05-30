@@ -8,6 +8,7 @@ from german import say, sayByExp
 def main(args):
     number = args.number[0]
     if args.zeros:
+        # Do not say given number, but the number with that many zeros.
         zeros, zerosLeft = divmod(number, 3)
         zeros *= 3
         ret = ""
@@ -18,6 +19,7 @@ def main(args):
         ret += sayByExp(zeros, plural)
         print ret
     elif args.random:
+        # Do not say given number, but a random number with that many digits.
         digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
         randomNumber = random.choice(digits)
         digits.append('0')

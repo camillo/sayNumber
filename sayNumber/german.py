@@ -1,22 +1,19 @@
-# -*- coding: iso-8859-1 -*-
 import os
 
 # German has a lot of exceptions during the first 20 numbers, so easiest thing is
 # to collect them in a dict, instead of writing special code.
 SMALL_NUMBERS = {
-    '0': 'null',      '1': 'eins',       '2': 'zwei',       '3': 'drei',      '4': 'vier',
-    '5': 'fünf',      '6': 'sechs',      '7': 'sieben',     '8': 'acht',      '9': 'neun',
-    '10': 'zehn',     '11': 'elf',       '12': 'zwölf',     '13': 'dreizehn', '14': 'vierzehn',
-    '15': 'fünfzehn', '16': 'sechszehn', '17': 'siebzehn',  '18': 'achtzehn', '19': 'neunzehn'}
-
+    '0': 'null',             '1': 'eins',       '2': 'zwei',          '3': 'drei',      '4': 'vier',
+    '5': 'f\xc3\xbcnf',      '6': 'sechs',      '7': 'sieben',        '8': 'acht',      '9': 'neun',
+    '10': 'zehn',            '11': 'elf',       '12': 'zw\xc3\xb6lf', '13': 'dreizehn', '14': 'vierzehn',
+    '15': 'f\xc3\xbcnfzehn', '16': 'sechszehn', '17': 'siebzehn',     '18': 'achtzehn', '19': 'neunzehn'}
 
 # These are exceptions, building german 2 digit numbers like 72.
-DECI_EXCEPTIONS = {
+GERMAN_DEZI_EXCEPTIONS = {
     '2': 'zwan',
     '6': 'sech',
     '7': 'sieb'
 }
-
 
 # These are the prefixes to build latin numbers.
 # @see http://de.wikipedia.org/wiki/Zahlennamen#Nomenklatur_f.C3.BCr_Zahlen_ab_1_000_000 for details.
@@ -29,11 +26,12 @@ LATIN_PREFIXES = [
     # 2: list of ten-prefixes
     [['dezi', 'n'], ['viginti', 'm', 's'], ['triginta', 'n', 's'], ['quadraginta', 'n', 's'],
     ['quinquaginta', 'n', 's'], ['sexaginta', 'n'], ['septuaginta', 'n'], ['oktoginta', 'm', 'x'], ['nonaginta', ]],
-    # 3: list of hundred prefixes
+    # 3: list of hundred-prefixes
     [['zenti', 'n', 'x'], ['duzenti', 'n'], ['trezenti', 'n', 's'], ['quadringenti', 'n', 's'],
     ['quingenti', 'n', 's'], ['seszenti', 'n'], ['septingenti', 'n'], ['oktingenti', 'm', 'x'], ['nongenti', ]]
 ]
-
+# Named indexes for LATIN_PREFIXES to make code better readable.
+ALONE_ONES, COMBINE_ONES, TENS, HUNDREDS = 0, 1, 2, 3
 
 # There are two exceptions, building latin numbers
 # 1. quinquadezi has a different name: quindezi
@@ -47,56 +45,50 @@ COMBINE_EXCEPTIONS = {
 def _sayLatin(number):
     """
     Build the latin word for given number.
-    @param number from 1 to 999.
+    @param number int from 1 to 999.
     @return The latin word for given number.
     """
     if not 0 < number < 1000:
-        raise ValueError("Number must be 1-999.")
+        raise ValueError("Number must be 1-999; given: [%s]." % number)
 
-    def combineOnePrefix(one, other):
-        """
-        Combines the one prefix, with a ten or hundred.
-        """
-        ret = one[0] + other[0]
-        for currentSpecial in one[1:]:
-            if currentSpecial in other[1:]:
-                ret = one[0] + currentSpecial + other[0]
-                break
-
-        return COMBINE_EXCEPTIONS.get(ret, ret)
-
-    currentNumber = number
-    one = currentNumber % 10
-    currentNumber -= one
-    ten = currentNumber % 100
-    hundred = currentNumber - ten
+    one = number % 10
+    ten = (number - one) % 100
+    hundred = number - ten - one
+    oneIndex, tenIndex, hundredIndex = one - 1, ten / 10 - 1, hundred / 100 - 1
 
     if ten == 0 and hundred == 0:
-        return LATIN_PREFIXES[0][one - 1]
+        return LATIN_PREFIXES[ALONE_ONES][oneIndex]
     if one == 0:
         if ten == 0:
-            return LATIN_PREFIXES[3][hundred / 100 - 1][0]
+            return LATIN_PREFIXES[HUNDREDS][hundredIndex][0]
         else:
-            ret = LATIN_PREFIXES[2][ten / 10 - 1][0]
-            return ret + LATIN_PREFIXES[3][hundred / 100 - 1][0] if hundred > 0 else ret
+            ret = LATIN_PREFIXES[TENS][tenIndex][0]
+            return ret + LATIN_PREFIXES[HUNDREDS][hundredIndex][0] if hundred else ret
 
-    onePrefix = LATIN_PREFIXES[1][one - 1]
+    onePrefix = LATIN_PREFIXES[COMBINE_ONES][oneIndex]
+
+    def combineOnePrefix(one, other):
+        """ Combine the one prefix, with a ten or hundred. """
+        additionalCharacter = set(one[1:]).intersection(other[1:])
+        ret = one[0] + (additionalCharacter.pop() if additionalCharacter else '') + other[0]
+        return COMBINE_EXCEPTIONS.get(ret, ret)
+
     if ten == 0:
-        return combineOnePrefix(onePrefix, LATIN_PREFIXES[3][hundred / 100 - 1])
-    ret = combineOnePrefix(onePrefix, LATIN_PREFIXES[2][ten / 10 - 1])
-    return ret + LATIN_PREFIXES[3][hundred / 100 - 1][0] if hundred > 0 else ret
+        return combineOnePrefix(onePrefix, LATIN_PREFIXES[HUNDREDS][hundredIndex])
+    ret = combineOnePrefix(onePrefix, LATIN_PREFIXES[TENS][tenIndex])
+    return ret + LATIN_PREFIXES[HUNDREDS][hundredIndex][0] if hundred else ret
 
 
 def _sayLongLadder(zeros, plural=False):
     """
     Build the word for the number, starting with a 1, followed by as many 0 as specified in zeros.
-    @param zeros the number of "0", following the "1". Must be 6 at least and zeros % 3 == 0.
+    @param zeros the number of "0"s, following the "1". Must be 6 at least and zeros mod 3 == 0.
     @param plural True, if the plural form should be returned, False for singular.
     @return the word, using the long ladder system.
     """
     if zeros < 6:
         raise ValueError('Zeros must be 6 or greater.')
-    if not zeros % 3 == 0:
+    if zeros % 3 > 0:
         raise ValueError("Zeros mod 3 must be 0.")
     sixes, lliarde = divmod(zeros, 6)
     ret = ""
@@ -136,21 +128,22 @@ def sayByExp(zeros, plural=False):
     """
     if zeros < 3:
         raise ValueError('Zeros must be 3 or greater.')
-    elif not zeros % 3 == 0:
+    if zeros % 3 > 0:
         raise ValueError("Zeros mod 3 must be 0.")
-    elif zeros == 3:
+    if zeros == 3:
         ret = "tausend"
     else:
         ret = _sayLongLadder(zeros, plural)
     return ret
 
 
-def _sayShortNumber(shortNumber, componentsLeft):
+def _sayShortNumber(shortNumber, sayEin):
     """
-    Helper to say a short number, that is used before another part (zwanzig millionen or eine million or ein tausend)
+    Helper to say a short number, that is used before another part (neunzehn millionen or eine million or ein tausend)
+    @param sayEin True to say ein, instead of eine in case of shortNmuber == 1
     """
-    if shortNumber == "1" and componentsLeft > 0:
-        return "ein" if componentsLeft == 2 else "eine"
+    if shortNumber == "1":
+        return "ein" if sayEin else "eine"
     return SMALL_NUMBERS[shortNumber]
 
 
@@ -163,12 +156,12 @@ def _sayGerman(number, componentsLeft):
         raise ValueError("Number must be 0-999")
     number = str(number)
     if number in SMALL_NUMBERS:
-        return _sayShortNumber(number, componentsLeft)
+        return _sayShortNumber(number, componentsLeft == 2)
     currentLen = len(number)
     ret = ""
     if currentLen == 3:
         if not number[0] == "0":
-            ret = _sayShortNumber(number[0], 2) + "hundert"
+            ret = _sayShortNumber(number[0], sayEin=True) + "hundert"
         return ret + _sayGerman(number[1:], componentsLeft)
 
     if number[0] == "0":
@@ -176,18 +169,18 @@ def _sayGerman(number, componentsLeft):
             return ""
         return SMALL_NUMBERS[number[1]]
     if not number[1] == "0":
-        ret = _sayShortNumber(number[1], 2) + "und"
-    ret += DECI_EXCEPTIONS.get(number[0], SMALL_NUMBERS[number[0]]) + "zig"
+        ret = _sayShortNumber(number[1], sayEin=True) + "und"
+    ret += GERMAN_DEZI_EXCEPTIONS.get(number[0], SMALL_NUMBERS[number[0]]) + "zig"
     return ret
 
 
-def _split(number):
+def _splitThousandBlocks(number):
     """
     Helper that splits the given number to blocks of thousands.
     @return array of blocks. As lower the index, as higher the value.
     """
     ret = []
-    currentNumber = number
+    currentNumber = str(number)
     firstNumbers = len(number) % 3
     if firstNumbers:
         ret.append(currentNumber[0:firstNumbers])
@@ -209,28 +202,28 @@ def say(number, byLine=False, latinOnly=False):
     number = str(number)
     if number in SMALL_NUMBERS:
         return SMALL_NUMBERS[number]
-    components = _split(number)
-    componentsLeft = len(components)
+    blocks = _splitThousandBlocks(number)
+    blocksLeft = len(blocks)
     ret = ""
     isFirstComponent = True
-    for currentComponent in components:
+    for thousandBlock in blocks:
         try:
-            if currentComponent == "000":
+            if thousandBlock == "000":
                 continue
             if latinOnly:
                 if not byLine and not isFirstComponent:
                     ret += " "
-                ret += str(int(currentComponent))
-                if componentsLeft > 1:
+                ret += str(int(thousandBlock))
+                if blocksLeft > 1:
                     ret += " "
             else:
-                ret += _sayGerman(currentComponent, componentsLeft)
-            if componentsLeft > 1:
-                ret += sayByExp((componentsLeft - 1) * 3, plural=int(currentComponent) > 1)
+                ret += _sayGerman(thousandBlock, blocksLeft)
+            if blocksLeft > 1:
+                ret += sayByExp((blocksLeft - 1) * 3, plural=int(thousandBlock) > 1)
             if byLine:
                 ret += os.linesep
         finally:
-            componentsLeft -= 1
+            blocksLeft -= 1
             isFirstComponent = False
 
     return ret
