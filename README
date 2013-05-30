@@ -5,29 +5,37 @@ Usage
 =====
 
 say.py --help
-usage: say.py [-h] [--byLine] [--latinOnly] [--zeros] [--random] [--numeric]
-              number
+usage: say.py [-h] [-e] [-v] [-c] [-C] [-n] [-b] [-l] [-g] [-z | -r] number
 
-Write german names of (very) big numbers, using long ladder system.
+Write german names of (very) big numbers.
 
 positional arguments:
-  number           The number to say.
+  number             the number to say
+
+help:
+  -h, --help         show this help message and exit
+  -e, --example      show examples and exit
+  -v, --version      show program's version number and exit
+  -c, --licence      show licence information and exit
+  -C, --fullLicence  show full licence and exit
 
 optional arguments:
-  -h, --help       show this help message and exit
-  --byLine, -b     Write components line by line.
-  --latinOnly, -l  Say "123 millionen" instead of
-                   "einhundertdreiundzwanzigmillionen"
-  --zeros, -z      Do not say given number, but the number with that many
-                   zeros.
-  --random, -r     Do not say given number, but a random number with that many
-                   digits.
-  --numeric, -n    Say the number also in numeric form.
+  -n, --numeric      say the number also in numeric form
 
-  say.py does also show, how to use the lib.
+format:
+  -b, --byLine       write components line by line
+  -l, --latinOnly    say "123 millionen" instead of "einhundertdreiundzwanzigmillionen"
+  -g, --grouping     group thousand blocks; implicit using -n
+
+building numbers:
+  -z, --zeros        do not say given number, but the number with that many zeros
+  -r, --random       do not say given number, but a random number with that many digits
 
 Examples
 ========
+
+say.py --example shows complete examples. Some here:
+
 say.py 9999999345349583045894
 neuntrilliardenneunhundertneunundneunzigtrillionenneunhundertneunundneunzigbilli
 ardendreihundertfünfundvierzigbillionendreihundertneunundvierzigmilliardenfünfhu
@@ -72,3 +80,7 @@ aseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillise
 sexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintasesze
 ntillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagi
 ntaseszentilliarden
+
+Copyright (C) 2013 Daniel Marohn - daniel.marohn@gmail.com
+This program is free software; find details in file LICENCE or here:
+http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
