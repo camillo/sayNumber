@@ -49,6 +49,9 @@ say.py --zeros 1000000
 say.py --zeros 9999999345349583045894
 100 millisesexagintaseszentillisesexagintaseszentilliseptenquinquagintaquingentillioktoquinquagintaquingentillitresexagintaduzentilliquadragintaoktingentilliduooktogintanongentillionen
 
+say.py -z 9290823849028419271209381902381 --delimiter
+100 mi-lli-okto-quadraginta-quingenti-lli-septuagintaquadringenti-lli-un-quadraginta-seszenti-lli-quattuor-quingenti-lli-ses-triginta-septingenti-lli-quinqua-quadraginta-quingenti-lli-un-duzenti-lli-tre-sexaginta-quingenti-lli-quinquagintaseszenti-lli-se-nonaginta-trezenti-lliarden
+
 say.py --random 123
 siebenhundertvierundsechzigvigintillioneneinhundertvierzignovendezilliardene ... izigtausenddreihundertvierzehn
 
@@ -206,7 +209,7 @@ def main(args):
         zeros, zerosLeft = divmod(number, 3)
         zeros *= 3
         ret = ("10" if zerosLeft == 1 else "100") + " " if zerosLeft else ""
-        ret += sayByExp(zeros, zerosLeft)
+        ret += sayByExp(zeros, zerosLeft, delimiter=args.delimiter)
         numeric = "1" + "0" * number if args.numeric else None
     elif args.random:
         # Do not say given number, but a random number with that many digits.
@@ -215,9 +218,9 @@ def main(args):
         numeric = random.choice(digits)
         digits.append('0')
         numeric += "".join([random.choice(digits) for _ in range(number - 1)])
-        ret = say(numeric, byLine=args.byLine, latinOnly=args.latinOnly)
+        ret = say(numeric, byLine=args.byLine, latinOnly=args.latinOnly, delimiter=args.delimiter)
     else:
-        ret = say(number, byLine=args.byLine, latinOnly=args.latinOnly)
+        ret = say(number, byLine=args.byLine, latinOnly=args.latinOnly, delimiter=args.delimiter)
         numeric = number
     if args.numeric:
         print locale.format("%d", int(numeric), grouping=args.grouping)
@@ -268,8 +271,8 @@ def createParser():
                        help='say "123 millionen" instead of "einhundertdreiundzwanzigmillionen"')
     group.add_argument('-g', '--grouping', dest='grouping', action=GroupingAction,
                        help="group thousand blocks; implicit using -n")
-    group.add_argument('-d', '--delimiter', nargs="?", const='-', dest='delimiter',
-                       help="separate latin prefixes; using '-' if argument stands alone")
+    group.add_argument('-d', '--delimiter', nargs="?", const='-', dest='delimiter', default='',
+                       help="separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the numbers get build")
     group.add_argument('-L', '--locale', dest="locale", nargs=1, type=validLocale, default='',
                        help='locale for formatting numbers; only useful with -g/--grouping')
 

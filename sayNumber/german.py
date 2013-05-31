@@ -43,15 +43,16 @@ ALONE_ONES, COMBINE_ONES, TENS, HUNDREDS = 0, 1, 2, 3
 # 1. quinquadezi has a different name: quindezi
 # 2. 103 would normally be trezenti, but this is reserved for 300. This is, why 103 is treszenti.
 COMBINE_EXCEPTIONS = {
-    'quinquadezi': 'quindezi',
-    'trezenti': 'treszenti'
+    'quinquadezi': ['quindezi', ],
+    'trezenti': ['tres', 'zenti']
 }
 
 
-def _sayLatin(number):
+def _sayLatin(number, delimiter=''):
     """
     Build the latin word for given number.
     @param number int from 1 to 999.
+    @param delimiter Separates the prefixes
     @return The latin word for given number.
     """
     if not 0 < number < 1000:
@@ -69,23 +70,24 @@ def _sayLatin(number):
             return LATIN_PREFIXES[HUNDREDS][hundredIndex][0]
         else:
             ret = LATIN_PREFIXES[TENS][tenIndex][0]
-            return ret + LATIN_PREFIXES[HUNDREDS][hundredIndex][0] if hundred else ret
+            return ret + delimiter + LATIN_PREFIXES[HUNDREDS][hundredIndex][0] if hundred else ret
 
     onePrefix = LATIN_PREFIXES[COMBINE_ONES][oneIndex]
 
     def combineOnePrefix(one, other):
         """ Combine the one prefix, with a ten or hundred. """
         additionalCharacter = set(one[1:]).intersection(other[1:])
-        ret = one[0] + (additionalCharacter.pop() if additionalCharacter else '') + other[0]
-        return COMBINE_EXCEPTIONS.get(ret, ret)
+        ret = one[0] + (additionalCharacter.pop() if additionalCharacter else '') + delimiter + other[0]
+        exception = COMBINE_EXCEPTIONS.get(ret.replace(delimiter, ''), None)
+        return delimiter.join(exception) if exception else ret
 
     if ten == 0:
         return combineOnePrefix(onePrefix, LATIN_PREFIXES[HUNDREDS][hundredIndex])
     ret = combineOnePrefix(onePrefix, LATIN_PREFIXES[TENS][tenIndex])
-    return ret + LATIN_PREFIXES[HUNDREDS][hundredIndex][0] if hundred else ret
+    return ret + delimiter + LATIN_PREFIXES[HUNDREDS][hundredIndex][0] if hundred else ret
 
 
-def _sayLongLadder(zeros, plural=False):
+def _sayLongLadder(zeros, plural=False, delimiter=''):
     """
     Build the word for the number, starting with a 1, followed by as many 0 as specified in zeros.
     @param zeros the number of "0"s, following the "1". Must be 6 at least and zeros mod 3 == 0.
@@ -103,16 +105,17 @@ def _sayLongLadder(zeros, plural=False):
         current = sixes % 1000
         if current == 0:
             # This is the prefix for 000
-            prefix = "ni"
+            prefix = "ni" + delimiter
         else:
-            prefix = _sayLatin(current)
+            prefix = _sayLatin(current, delimiter)
             # If we combine a ten prefix, without a hundred prefix, the 'a' changes to 'i' if present at last position.
             if 100 > current > 9 and prefix[-1] == "a":
                 prefix = prefix[:-1] + 'i'
             sixes -= current
+            prefix += delimiter
         # This is the prefix for separating the thousand blocks. We skip this, if this is the firs iteration.
         if ret:
-            prefix += "lli"
+            prefix += "lli" + delimiter
         ret = prefix + ret
         sixes /= 1000
     # Now add the postfix to make a word.
@@ -125,11 +128,12 @@ def _sayLongLadder(zeros, plural=False):
     return ret + pluralPostfix if plural else ret
 
 
-def sayByExp(zeros, plural=False):
+def sayByExp(zeros, plural=False, delimiter=''):
     """
     Build the word for the number, starting with a 1, followed by as many "0" as specified in zeros.
     @param zeros the number of "0", following the "1". Must be 3 at least and zeros % 3 == 0.
     @param plural True, if the plural form should be returned, False for singular.
+    @param delimiter Separates the latin prefixes.
     @return the word, using the long ladder system if zeros > 3, german tausend otherwise.
     """
     if zeros < 3:
@@ -139,7 +143,7 @@ def sayByExp(zeros, plural=False):
     if zeros == 3:
         ret = "tausend"
     else:
-        ret = _sayLongLadder(zeros, plural)
+        ret = _sayLongLadder(zeros, plural, delimiter)
     return ret
 
 
@@ -197,7 +201,7 @@ def _splitThousandBlocks(number):
     return ret
 
 
-def say(number, byLine=False, latinOnly=False):
+def say(number, byLine=False, latinOnly=False, delimiter=''):
     """
     Build the german world for given number, using the long ladder system.
     @param number The number to build (can be a string or int).
@@ -223,9 +227,9 @@ def say(number, byLine=False, latinOnly=False):
                 if blocksLeft > 1:
                     ret += " "
             else:
-                ret += _sayGerman(thousandBlock, blocksLeft)
+                ret += _sayGerman(thousandBlock, blocksLeft) + (delimiter if blocksLeft > 1 else '')
             if blocksLeft > 1:
-                ret += sayByExp((blocksLeft - 1) * 3, plural=int(thousandBlock) > 1)
+                ret += sayByExp((blocksLeft - 1) * 3, plural=int(thousandBlock) > 1, delimiter=delimiter)
             if byLine:
                 ret += os.linesep
         finally:
