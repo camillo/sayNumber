@@ -2,12 +2,15 @@
 # -*- coding: iso-8859-1 -*-
 
 COPYRIGHT = "Copyright (C) 2013 Daniel Marohn - daniel.marohn@gmail.com"
-VERSION = "1.0"
 # This program is free software; find details in file LICENCE or here:
 # https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
 
+VERSION = "1.0"
+
 import sys
+import os
 import argparse
+import locale
 
 
 class MessageAction(argparse._HelpAction):
@@ -15,7 +18,7 @@ class MessageAction(argparse._HelpAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
         try:
-            parser.exit(message=self.message())
+            parser.exit(message=self.message().decode('latin-1'))
         except Exception as ex:
             parser.error(ex.message)
 
@@ -32,9 +35,7 @@ say.py 123
 einhundertdreiundzwanzig
 
 say.py 9999999345349583045894
-neuntrilliardenneunhundertneunundneunzigtrillionenneunhundertneunundneunzigbilli
-ardendreihundertfünfundvierzigbillionendreihundertneunundvierzigmilliardenfünfhu
-ndertdreiundachtzigmillionenfünfundvierzigtausendachthundertvierundneunzig
+neuntrilliardenneunhundertneunundneunzigtrillionenneunhundertneunundneunzigbilliardendreihundertfünfundvierzigbillionendreihundertneunundvierzigmilliardenfünfhundertdreiundachtzigmillionenfünfundvierzigtausendachthundertvierundneunzig
 
 say.py --zeros 123
 vigintilliarde
@@ -43,9 +44,7 @@ say.py --zeros 1000000
 10 sesexagintazentillisesexagintaseszentilliarden
 
 say.py --zeros 9999999345349583045894
-100 millisesexagintaseszentillisesexagintaseszentilliseptenquinquagintaquingenti
-llioktoquinquagintaquingentillitresexagintaduzentilliquadragintaoktingentilliduo
-oktogintanongentillionen
+100 millisesexagintaseszentillisesexagintaseszentilliseptenquinquagintaquingentillioktoquinquagintaquingentillitresexagintaduzentilliquadragintaoktingentilliduooktogintanongentillionen
 
 say.py --random 123
 siebenhundertvierundsechzigvigintillioneneinhundertvierzignovendezilliardene ... izigtausenddreihundertvierzehn
@@ -78,7 +77,7 @@ say.py --googolplex
 class LicenceAction(MessageAction):
     """ Show licence and exit """
     def message(self):
-        return COPYRIGHT + """\n
+        return COPYRIGHT + os.linesep + """
     Find full licence in file LICENCE or use option -C/--fullLicence
 
     This program is free software; you can redistribute it and/or modify
@@ -93,8 +92,7 @@ class LicenceAction(MessageAction):
 
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-"""
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA."""
 
 
 class FullLicenceAction(MessageAction):
@@ -105,7 +103,7 @@ class FullLicenceAction(MessageAction):
         filename = os.path.join(myDir, 'LICENSE')
         try:
             with open(filename, 'r') as licenceFile:
-                return COPYRIGHT + "\n" + licenceFile.read()
+                return COPYRIGHT + os.linesep + licenceFile.read()
         except IOError:
             # noinspection PyBroadException
             try:
@@ -120,9 +118,11 @@ class FullLicenceAction(MessageAction):
                             licenceFile.write(licence)
                     except IOError:
                         pass
-                    return COPYRIGHT + "\n%s" % licence
+                    return COPYRIGHT + os.linesep + licence
                 else:
                     raise Exception("no 200 OK [%s %s]" % (response.status, response.reason))
+            except KeyboardInterrupt:
+                raise
             except Exception as _:
                 raise Exception("Licence file not found. Find licence here: https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE")
 
@@ -135,7 +135,7 @@ class GroupingAction(argparse._StoreTrueAction):
 
 
 def atLeastZero(value):
-    """ Check that value is numeric and >0 """
+    """ Check that value is numeric and >= 0 """
     try:
         ret = int(value)
         if ret < 0:
@@ -169,18 +169,20 @@ def main(args):
         ret = say(number, byLine=args.byLine, latinOnly=args.latinOnly)
         numeric = number
     if args.numeric:
-        import locale
-        locale.setlocale(locale.LC_NUMERIC, '')
         print locale.format("%d", int(numeric), grouping=args.grouping)
-    print ret.decode('latin-1')
+    if args.noUmlaut:
+        print ret.replace("ö", "oe").replace("ü", "ue")
+    else:
+        print ret.decode('latin-1')
 
 
 def createParser():
     parser = argparse.ArgumentParser(description='Write german names of (very) big numbers.',
-                                     epilog="Please report bugs to daniel.marohn@gmail.com.\nFind more information here: http://de.wikipedia.org/wiki/Zahlennamen",
+                                     epilog="Please report bugs to daniel.marohn@gmail.com." + os.linesep +
+                                            "Find more information here: http://de.wikipedia.org/wiki/Zahlennamen",
                                      formatter_class=argparse.RawTextHelpFormatter, add_help=False)
 
-    group = parser.add_argument_group("chose one of these").add_mutually_exclusive_group(required=True)
+    group = parser.add_argument_group("select one of these").add_mutually_exclusive_group(required=True)
     group.add_argument('number', nargs="?", type=atLeastZero, help='say this number')
     group.add_argument('-G', '--googol', action="store_true", help='say a googol (10^100)')
     group.add_argument('-GG', '--googolplex', action="store_true", help='say a googolplex (10^googol)')
@@ -201,6 +203,8 @@ def createParser():
                        help="say the number also in numeric form; it is not recommended to use this option with more than 1.000.000 digits")
     group.add_argument('-f', '--force', dest='force', action='store_true',
                        help="ignore size warnings")
+    group.add_argument('-U', '--noUmlaut', dest='noUmlaut', action='store_true',
+                       help="use ue and oe instead of german umlaut; this might become handy, if you cannot change your terminal's encoding")
 
     group = parser.add_argument_group('format')
     group.add_argument('-b', '--byLine', dest='byLine', action='store_true',
@@ -218,8 +222,9 @@ def createParser():
 
     return parser
 
-if __name__ == "__main__":
 
+def parseCommandlineArguments():
+    """ Parse the command line arguments, do sanity checks and return ready to use args. """
     parser = createParser()
     args = parser.parse_args()
     if args.numeric:
@@ -227,13 +232,20 @@ if __name__ == "__main__":
         if (args.zeros or args.random) and number > sys.maxint:
             parser.error(message="When using -n/--numeric, together with -z/--zeros or -r/--random, number must be less or equal %d." % sys.maxint)
         if number > 150000 and not args.force:
-                parser.error(message="Building and writing the numeric version of such a big number use a lot of time and memory. " +
-                                     "Depending on the size, it my take minutes or longer.\n" +
-                                     "Delete option -n/--numeric or activate -f/--force, if you know what you are doing.")
+            parser.error(message="Building and writing the numeric version of such a big number use a lot of time and memory. " +
+                                 "Depending on the size, it my take minutes or longer." + os.linesep +
+                                 "Delete option -n/--numeric or activate -f/--force, if you know what you are doing.")
     if args.googolplex and (args.zeros or args.random or args.numeric):
         parser.error(message="Sorry... there cannot be ever a computer available, that would be able to print or build a googoleplex in digits.")
     if args.googol and args.random:
         parser.error(message="I cannot append a googol random digits; no computer will EVER be able to do this.")
+
+    return args
+
+
+if __name__ == "__main__":
+    locale.setlocale(locale.LC_NUMERIC, '')
+    args = parseCommandlineArguments()
     try:
         main(args)
     except ValueError as ex:
