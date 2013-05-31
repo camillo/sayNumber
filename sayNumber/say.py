@@ -171,6 +171,13 @@ def validLocale(value):
     """ Check that value is a valid locale or alias and resolves the alias if needed. """
     if value and not value in locale.locale_alias:
         raise argparse.ArgumentTypeError("not a locale: '%s'; use -SL/--showLocals to see valid options." % value)
+    current = locale.getlocale(locale.LC_NUMERIC)
+    try:
+        locale.setlocale(locale.LC_NUMERIC, value)
+    except locale.Error as ex:
+        raise argparse.ArgumentTypeError(ex.message + "; use -SL/--showLocales to see valid options.")
+    finally:
+        locale.setlocale(locale.LC_NUMERIC, current)
     return value
 
 
@@ -281,6 +288,9 @@ if __name__ == "__main__":
     try:
         locale.setlocale(locale.LC_NUMERIC, args.locale[0] if args.locale else '')
         main(args)
+    except locale.Error as ex:
+        print "error:" + ex.message + "; use -SL/--showLocales to see valid options."
+        sys.exit(3)
     except ValueError as ex:
         print ex.message
         sys.exit(3)
