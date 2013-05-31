@@ -150,11 +150,12 @@ class ShowLocalesAction(MessageAction):
 
 
 class GoogolplexplexAction(MessageAction):
-    """ Explain, why we cannot handle a googolexplex end exit """
+    """ Explain, why we cannot handle a googolplexplex end exit """
     def message(self):
         return """This say.py has no cow power.
+
 To work with a googolplexplex, you need to handle a googolplex digits. This are (far, far) more digits than atoms in the whole universe.
-Even if we somehow manage to handle it in a generic way, it would take longer to print out the name, than the universe will exist.
+Even if we somehow manage to handle it in a generic way, it would probably take longer to print out the name, than the universe will exist.
 see: http://www.youtube.com/watch?v=5JOAoiX1LHA"""
 
 
@@ -262,7 +263,7 @@ def createParser():
     group.add_argument('-g', '--grouping', dest='grouping', action=GroupingAction,
                        help="group thousand blocks; implicit using -n")
     group.add_argument('-L', '--locale', dest="locale", nargs=1, type=validLocale, default='',
-                       help='use this locale for formatting numbers; only useful with -g/--grouping')
+                       help='locale for formatting numbers; only useful with -g/--grouping')
 
     group = parser.add_argument_group('number').add_mutually_exclusive_group()
     group.add_argument('-z', '--zeros', dest='zeros', action='store_true',
@@ -280,15 +281,16 @@ def parseCommandlineArguments():
     if args.numeric:
         number = args.number
         if (args.zeros or args.random) and number > sys.maxint:
-            parser.error(message="When using -n/--numeric, together with -z/--zeros or -r/--random, number must be less or equal %d." % sys.maxint)
+            locale.setlocale(locale.LC_NUMERIC, '')
+            parser.exit(status=3, message="When using -n/--numeric, together with -z/--zeros or -r/--random, number must be less or equal " + locale.format("%d", sys.maxint, grouping=True))
         if number > 150000 and (args.zeros or args.random) and not args.force:
-            parser.error(message="Building and writing the numeric version of such a big number may take a lot of time. " +
-                                 "Depending on the size, it my take minutes or longer." + os.linesep +
-                                 "Delete option -n/--numeric or activate -f/--force, if you know what you are doing.")
+            parser.exit(status=3, message="Building and writing the numeric version of such a big number may take a lot of time. " +
+                                          "Depending on the size, it my take minutes or longer." + os.linesep +
+                                          "Delete option -n/--numeric or activate -f/--force, if you know what you are doing.")
     if args.googolplex and (args.zeros or args.random or args.numeric):
-        parser.error(message="Sorry... there cannot be ever a computer available, that would be able to print or build a googoleplex in digits.")
+        parser.exit(status=3, message="Sorry... there cannot be ever a computer available, that would be able to print or build a googoleplex digits.")
     if args.googol and args.random:
-        parser.error(message="I cannot append a googol random digits; no computer will EVER be able to do this.")
+        parser.exit(status=3, message="I cannot append a googol random digits; no computer will EVER be able to do this.")
 
     return args
 
