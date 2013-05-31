@@ -149,6 +149,15 @@ class ShowLocalesAction(MessageAction):
         return ret
 
 
+class GoogolplexplexAction(MessageAction):
+    """ Explain, why we cannot handle a googolexplex end exit """
+    def message(self):
+        return """This say.py has no cow power.
+To work with a googolplexplex, you need to handle a googolplex digits. This are (far, far) more digits than atoms in the whole universe.
+Even if we somehow manage to handle it in a generic way, it would take longer to print out the name, than the universe will exist.
+see: http://www.youtube.com/watch?v=5JOAoiX1LHA"""
+
+
 class GroupingAction(argparse._StoreTrueAction):
     """ Add numeric option, if grouping is used """
     def __call__(self, parser, args, values, option=None):
@@ -222,6 +231,7 @@ def createParser():
     group.add_argument('number', nargs="?", type=atLeastZero, help='say this number')
     group.add_argument('-G', '--googol', action="store_true", help='say a googol (10^100)')
     group.add_argument('-GG', '--googolplex', action="store_true", help='say a googolplex (10^googol)')
+    group.add_argument('-GGG', '--googolplexplex', action=GoogolplexplexAction, help='say a googolplexplex (10^googolplex)')
 
     group = parser.add_argument_group('help')
     group.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
@@ -238,7 +248,7 @@ def createParser():
 
     group = parser.add_argument_group('optional arguments')
     group.add_argument('-n', '--numeric', dest='numeric', action='store_true',
-                       help="say the number also in numeric form; it is not recommended to use this option with more than 1.000.000 digits")
+                       help="say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits")
     group.add_argument('-f', '--force', dest='force', action='store_true',
                        help="ignore size warnings")
     group.add_argument('-U', '--noUmlaut', dest='noUmlaut', action='store_true',
@@ -272,7 +282,7 @@ def parseCommandlineArguments():
         if (args.zeros or args.random) and number > sys.maxint:
             parser.error(message="When using -n/--numeric, together with -z/--zeros or -r/--random, number must be less or equal %d." % sys.maxint)
         if number > 150000 and (args.zeros or args.random) and not args.force:
-            parser.error(message="Building and writing the numeric version of such a big number use a lot of time and memory. " +
+            parser.error(message="Building and writing the numeric version of such a big number may take a lot of time. " +
                                  "Depending on the size, it my take minutes or longer." + os.linesep +
                                  "Delete option -n/--numeric or activate -f/--force, if you know what you are doing.")
     if args.googolplex and (args.zeros or args.random or args.numeric):
@@ -288,9 +298,6 @@ if __name__ == "__main__":
     try:
         locale.setlocale(locale.LC_NUMERIC, args.locale[0] if args.locale else '')
         main(args)
-    except locale.Error as ex:
-        print "error:" + ex.message + "; use -SL/--showLocales to see valid options."
-        sys.exit(3)
     except ValueError as ex:
         print ex.message
         sys.exit(3)

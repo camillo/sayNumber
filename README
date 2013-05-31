@@ -5,8 +5,8 @@ Usage
 =====
 
 say.py --help
-usage: say.py [-G] [-GG] [-h] [-e] [-SL] [-v] [-c] [-C] [-n] [-f] [-U] [-b]
-              [-l] [-g] [-L LOCALE] [-z | -r]
+usage: say.py [-G] [-GG] [-GGG] [-h] [-e] [-SL] [-v] [-c] [-C] [-n] [-f] [-U]
+              [-b] [-l] [-g] [-L LOCALE] [-z | -r]
               [number]
 
 Write german names of (very) big numbers.
@@ -15,6 +15,8 @@ select one of these:
   number                say this number
   -G, --googol          say a googol (10^100)
   -GG, --googolplex     say a googolplex (10^googol)
+  -GGG, --googolplexplex
+                        say a googolplexplex (10^googolplex)
 
 help:
   -h, --help            show this help message and exit
@@ -25,7 +27,7 @@ help:
   -C, --fullLicence     show licence file and exit; tries to download and save licence, if not available
 
 optional arguments:
-  -n, --numeric         say the number also in numeric form; it is not recommended to use this option with more than 1.000.000 digits
+  -n, --numeric         say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits
   -f, --force           ignore size warnings
   -U, --noUmlaut        use ue and oe instead of german umlaut; this might become handy, if you cannot change your terminal's encoding
 
