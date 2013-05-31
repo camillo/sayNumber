@@ -23,7 +23,7 @@ class MessageAction(argparse._HelpAction):
             parser.error(ex.message)
 
     def message(self):
-        raise NotImplementedError("not implemented yet.")
+        raise NotImplementedError("Not implemented yet.")
 
 
 class ExampleAction(MessageAction):
@@ -71,6 +71,14 @@ zehnsedezilliarden
 
 say.py --googolplex
 10 millisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentilliarden
+
+say.py --locale german -n 100000000000 -f -g
+100.000.000.000
+einhundertmilliarden
+
+say.py --locale uk -n 100000000000 -f -g
+100,000,000,000
+einhundertmilliarden
 """
 
 
@@ -127,6 +135,20 @@ class FullLicenceAction(MessageAction):
                 raise Exception("Licence file not found. Find licence here: https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE")
 
 
+class ShowLocalesAction(MessageAction):
+    """ Show all available locales and exit """
+    def message(self):
+        ret = ""
+        for alias in locale.locale_alias:
+            try:
+                # Yes, this looks stupid, but I do not know a better way to get exactly these aliases, that are valid for LC_NUMERIC
+                locale.setlocale(locale.LC_NUMERIC, alias)
+                ret += alias + os.linesep
+            except locale.Error:
+                pass
+        return ret
+
+
 class GroupingAction(argparse._StoreTrueAction):
     """ Add numeric option, if grouping is used """
     def __call__(self, parser, args, values, option=None):
@@ -143,6 +165,13 @@ def atLeastZero(value):
         return ret
     except ValueError:
         raise argparse.ArgumentTypeError("not a number: '%s'" % value)
+
+
+def validLocale(value):
+    """ Check that value is a valid locale or alias and resolves the alias if needed. """
+    if value and not value in locale.locale_alias:
+        raise argparse.ArgumentTypeError("not a locale: '%s'; use -SL/--showLocals to see valid options." % value)
+    return value
 
 
 def main(args):
@@ -192,6 +221,8 @@ def createParser():
                        help="show this help message and exit")
     group.add_argument('-e', '--example', action=ExampleAction, dest='example', default=argparse.SUPPRESS,
                        help='show examples and exit')
+    group.add_argument('-SL', '--showLocales', action=ShowLocalesAction, default=argparse.SUPPRESS,
+                       help="show available locales and exit")
     group.add_argument('-v', '--version', action='version', version=VERSION)
     group.add_argument('-c', '--licence', action=LicenceAction, default=argparse.SUPPRESS,
                        help="show licence information and exit")
@@ -213,6 +244,8 @@ def createParser():
                        help='say "123 millionen" instead of "einhundertdreiundzwanzigmillionen"')
     group.add_argument('-g', '--grouping', dest='grouping', action=GroupingAction,
                        help="group thousand blocks; implicit using -n")
+    group.add_argument('-L', '--locale', dest="locale", nargs=1, type=validLocale, default='',
+                       help='use this locale for formatting numbers; only useful with -g/--grouping')
 
     group = parser.add_argument_group('number').add_mutually_exclusive_group()
     group.add_argument('-z', '--zeros', dest='zeros', action='store_true',
@@ -231,7 +264,7 @@ def parseCommandlineArguments():
         number = args.number
         if (args.zeros or args.random) and number > sys.maxint:
             parser.error(message="When using -n/--numeric, together with -z/--zeros or -r/--random, number must be less or equal %d." % sys.maxint)
-        if number > 150000 and not args.force:
+        if number > 150000 and (args.zeros or args.random) and not args.force:
             parser.error(message="Building and writing the numeric version of such a big number use a lot of time and memory. " +
                                  "Depending on the size, it my take minutes or longer." + os.linesep +
                                  "Delete option -n/--numeric or activate -f/--force, if you know what you are doing.")
@@ -244,13 +277,13 @@ def parseCommandlineArguments():
 
 
 if __name__ == "__main__":
-    locale.setlocale(locale.LC_NUMERIC, '')
     args = parseCommandlineArguments()
     try:
+        locale.setlocale(locale.LC_NUMERIC, args.locale[0] if args.locale else '')
         main(args)
     except ValueError as ex:
         print ex.message
         sys.exit(3)
     except Exception as ex:
-        print "error, executing command: " + ex.message
+        print "error: " + ex.message
         sys.exit(1)

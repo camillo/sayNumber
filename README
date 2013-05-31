@@ -5,36 +5,40 @@ Usage
 =====
 
 say.py --help
-usage: say.py [-G] [-GG] [-h] [-e] [-v] [-c] [-C] [-n] [-f] [-b] [-l] [-g]
-              [-z | -r]
+usage: say.py [-G] [-GG] [-h] [-e] [-SL] [-v] [-c] [-C] [-n] [-f] [-U] [-b]
+              [-l] [-g] [-L LOCALE] [-z | -r]
               [number]
 
 Write german names of (very) big numbers.
 
-chose one of these:
-  number             say this number
-  -G, --googol       say a googol (10^100)
-  -GG, --googolplex  say a googolplex (10^googol)
+select one of these:
+  number                say this number
+  -G, --googol          say a googol (10^100)
+  -GG, --googolplex     say a googolplex (10^googol)
 
 help:
-  -h, --help         show this help message and exit
-  -e, --example      show examples and exit
-  -v, --version      show program's version number and exit
-  -c, --licence      show licence information and exit
-  -C, --fullLicence  show licence file and exit; tries to download and save licence, if not available
+  -h, --help            show this help message and exit
+  -e, --example         show examples and exit
+  -SL, --showLocales    show available locales and exit
+  -v, --version         show program's version number and exit
+  -c, --licence         show licence information and exit
+  -C, --fullLicence     show licence file and exit; tries to download and save licence, if not available
 
 optional arguments:
-  -n, --numeric      say the number also in numeric form; it is not recommended to use this option with more than 1.000.000 digits
-  -f, --force        ignore size warnings
+  -n, --numeric         say the number also in numeric form; it is not recommended to use this option with more than 1.000.000 digits
+  -f, --force           ignore size warnings
+  -U, --noUmlaut        use ue and oe instead of german umlaut; this might become handy, if you cannot change your terminal's encoding
 
 format:
-  -b, --byLine       write components line by line
-  -l, --latinOnly    say "123 millionen" instead of "einhundertdreiundzwanzigmillionen"
-  -g, --grouping     group thousand blocks; implicit using -n
+  -b, --byLine          write components line by line
+  -l, --latinOnly       say "123 millionen" instead of "einhundertdreiundzwanzigmillionen"
+  -g, --grouping        group thousand blocks; implicit using -n
+  -L LOCALE, --locale LOCALE
+                        use this locale for formatting numbers; only useful with -g/--grouping
 
 number:
-  -z, --zeros        do not say given number, but the number with that many zeros
-  -r, --random       do not say given number, but a random number with that many digits
+  -z, --zeros           do not say given number, but the number with that many zeros
+  -r, --random          do not say given number, but a random number with that many digits
 
 Examples
 ========
@@ -89,6 +93,14 @@ lisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintas
 xagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagint
 aseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintasesze
 ntillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentilliarden
+
+say.py --locale german -n 100000000000 -f -g
+100.000.000.000
+einhundertmilliarden
+
+say.py --locale uk -n 100000000000 -f -g
+100,000,000,000
+einhundertmilliarden
 
 Copyright (C) 2013 Daniel Marohn - daniel.marohn@gmail.com
 This program is free software; find details at sayNumber/LICENCE or here:
