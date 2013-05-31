@@ -12,6 +12,9 @@ import os
 import argparse
 import locale
 
+UNIVERSE = 10 ** 78
+GOOGOL = 10 ** 100
+
 
 class MessageAction(argparse._HelpAction):
     """ Write a message and exit. """
@@ -195,7 +198,9 @@ def main(args):
     from german import say, sayByExp
     number = args.number
     if args.googol or args.googolplex:
-        number = 10 ** 100
+        number = GOOGOL
+    elif args.universe:
+        number = UNIVERSE
     if args.zeros or args.googolplex:
         # Do not say given number, but the number with that many zeros.
         zeros, zerosLeft = divmod(number, 3)
@@ -233,6 +238,7 @@ def createParser():
     group.add_argument('-G', '--googol', action="store_true", help='say a googol (10^100)')
     group.add_argument('-GG', '--googolplex', action="store_true", help='say a googolplex (10^googol)')
     group.add_argument('-GGG', '--googolplexplex', action=GoogolplexplexAction, help='say a googolplexplex (10^googolplex)')
+    group.add_argument('-U', '--universe', action="store_true", help='say the number of atoms in the universe')
 
     group = parser.add_argument_group('help')
     group.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
@@ -252,7 +258,7 @@ def createParser():
                        help="say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits")
     group.add_argument('-f', '--force', dest='force', action='store_true',
                        help="ignore size warnings")
-    group.add_argument('-U', '--noUmlaut', dest='noUmlaut', action='store_true',
+    group.add_argument('-u', '--noUmlaut', dest='noUmlaut', action='store_true',
                        help="use ue and oe instead of german umlaut; this might become handy, if you cannot change your terminal's encoding")
 
     group = parser.add_argument_group('format')
@@ -262,6 +268,8 @@ def createParser():
                        help='say "123 millionen" instead of "einhundertdreiundzwanzigmillionen"')
     group.add_argument('-g', '--grouping', dest='grouping', action=GroupingAction,
                        help="group thousand blocks; implicit using -n")
+    group.add_argument('-d', '--delimiter', nargs="?", const='-', dest='delimiter',
+                       help="separate latin prefixes; using '-' if argument stands alone")
     group.add_argument('-L', '--locale', dest="locale", nargs=1, type=validLocale, default='',
                        help='locale for formatting numbers; only useful with -g/--grouping')
 
@@ -280,6 +288,8 @@ def parseCommandlineArguments():
     args = parser.parse_args()
     if args.numeric:
         number = args.number
+        if args.universe:
+            number = UNIVERSE
         if (args.zeros or args.random) and number > sys.maxint:
             locale.setlocale(locale.LC_NUMERIC, '')
             parser.exit(status=3, message="When using -n/--numeric, together with -z/--zeros or -r/--random, number must be less or equal " + locale.format("%d", sys.maxint, grouping=True))
