@@ -87,12 +87,12 @@ def _sayLatin(number, delimiter=''):
     return ret + delimiter + LATIN_PREFIXES[HUNDREDS][hundredIndex][0] if hundred else ret
 
 
-def _sayLongLadder(zeros, plural=False, delimiter=''):
+def _sayLongScale(zeros, plural=False, delimiter=''):
     """
     Build the word for the number, starting with a 1, followed by as many 0 as specified in zeros.
     @param zeros the number of "0"s, following the "1". Must be 6 at least and zeros mod 3 == 0.
     @param plural True, if the plural form should be returned, False for singular.
-    @return the word, using the long ladder system.
+    @return the word, using the long scale system.
     """
     if zeros < 6:
         raise ValueError('Zeros must be 6 or greater.')
@@ -128,22 +128,44 @@ def _sayLongLadder(zeros, plural=False, delimiter=''):
     return ret + pluralPostfix if plural else ret
 
 
-def sayByExp(zeros, plural=False, delimiter=''):
+def _sayShortScale(zeros, plural=False, delimiter=''):
+    """
+    Build the word for the number, starting with a 1, followed by as many 0 as specified in zeros.
+    @param zeros the number of "0"s, following the "1". Must be 6 at least and zeros mod 3 == 0.
+    @param plural True, if the plural form should be returned, False for singular.
+    @return the word, using the long scale system.
+    """
+    if zeros < 6:
+        raise ValueError('Zeros must be 6 or greater.')
+    if zeros % 3 > 0:
+        raise ValueError("Zeros mod 3 must be 0.")
+    longScaleZeros = zeros + (zeros / 3 - 2) * 3
+    ret = _sayLongScale(longScaleZeros, plural=False, delimiter=delimiter).replace('z', 'c')
+
+    return ret + "s" if plural else ret
+
+
+def sayByExp(zeros, plural=False, delimiter='', shortScale=False):
     """
     Build the word for the number, starting with a 1, followed by as many "0" as specified in zeros.
     @param zeros the number of "0", following the "1". Must be 3 at least and zeros % 3 == 0.
     @param plural True, if the plural form should be returned, False for singular.
     @param delimiter Separates the latin prefixes.
-    @return the word, using the long ladder system if zeros > 3, german tausend otherwise.
+    @param shortScale True, to use us/uk system, german otherwise
     """
     if zeros < 3:
         raise ValueError('Zeros must be 3 or greater.')
     if zeros % 3 > 0:
         raise ValueError("Zeros mod 3 must be 0.")
     if zeros == 3:
-        ret = "tausend"
+        if shortScale:
+            ret = "thousand"
+        else:
+            ret = "tausend"
+    elif shortScale:
+        ret = _sayShortScale(zeros, plural, delimiter)
     else:
-        ret = _sayLongLadder(zeros, plural, delimiter)
+        ret = _sayLongScale(zeros, plural, delimiter)
     return ret
 
 
@@ -201,9 +223,9 @@ def _splitThousandBlocks(number):
     return ret
 
 
-def say(number, byLine=False, latinOnly=False, delimiter=''):
+def say(number, byLine=False, latinOnly=False, delimiter='', shortScale=False):
     """
-    Build the german world for given number, using the long ladder system.
+    Build the german world for given number, using the long scale system.
     @param number The number to build (can be a string or int).
     @param byLine True, if a \n should be added between the parts of the spoken word.
     @param latinOnly If True build "123 millionen"; "einhundertdreiundzwanzingmillionen" otherwise.
@@ -229,7 +251,7 @@ def say(number, byLine=False, latinOnly=False, delimiter=''):
             else:
                 ret += _sayGerman(thousandBlock, blocksLeft) + (delimiter if blocksLeft > 1 else '')
             if blocksLeft > 1:
-                ret += sayByExp((blocksLeft - 1) * 3, plural=int(thousandBlock) > 1, delimiter=delimiter)
+                ret += sayByExp((blocksLeft - 1) * 3, plural=int(thousandBlock) > 1, delimiter=delimiter, shortScale=shortScale)
             if byLine:
                 ret += os.linesep
         finally:

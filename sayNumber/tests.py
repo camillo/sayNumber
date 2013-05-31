@@ -5,7 +5,7 @@
 # https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
 
 import unittest
-from german import say, _splitThousandBlocks, _sayLatin, _sayLongLadder
+from german import say, _splitThousandBlocks, _sayLatin, _sayLongScale, _sayShortScale
 
 
 class TestInternal(unittest.TestCase):
@@ -226,18 +226,32 @@ class TestLatin(unittest.TestCase):
         self.assertEqual('dezizenti', _sayLatin(110))
 
 
-class LongLadderTest(unittest.TestCase):
+class LongScaleTest(unittest.TestCase):
     def test6000(self):
-        self.assertEqual('millinillion', _sayLongLadder(6000))
-        self.assertEqual('millinillinillion', _sayLongLadder(6000000))
-        self.assertEqual('millinillinilliarde', _sayLongLadder(6000003))
-        self.assertEqual('nonillinovenonagintanongentillion', _sayLongLadder(59994))
+        self.assertEqual('millinillion', _sayLongScale(6000))
+        self.assertEqual('millinillinillion', _sayLongScale(6000000))
+        self.assertEqual('millinillinilliarde', _sayLongScale(6000003))
+        self.assertEqual('nonillinovenonagintanongentillion', _sayLongScale(59994))
 
     def testWordPrefix(self):
-        self.assertEqual('million', _sayLongLadder(6))
-        self.assertEqual('millionen', _sayLongLadder(6, True))
-        self.assertEqual('milliarde', _sayLongLadder(9))
-        self.assertEqual('milliarden', _sayLongLadder(9, True))
+        self.assertEqual('million', _sayLongScale(6))
+        self.assertEqual('millionen', _sayLongScale(6, True))
+        self.assertEqual('milliarde', _sayLongScale(9))
+        self.assertEqual('milliarden', _sayLongScale(9, True))
 
     def testTenWithoutHundred(self):
-        self.assertEqual('trigintillion', _sayLongLadder(180))
+        self.assertEqual('trigintillion', _sayLongScale(180))
+
+
+class ShortScaleTest(unittest.TestCase):
+    def testTo303(self):
+        self.assertEqual('million', _sayShortScale(6))
+        self.assertEqual('billion', _sayShortScale(9))
+        self.assertEqual('trillion', _sayShortScale(12))
+        self.assertEqual('quadrillion', _sayShortScale(15))
+        self.assertEqual('septendecillion', _sayShortScale(54))
+        self.assertEqual('quadragintillion', _sayShortScale(123))
+        self.assertEqual('centillion', _sayShortScale(303))
+        self.assertEqual('duocentillion', _sayShortScale(309))
+
+

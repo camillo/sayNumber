@@ -1,15 +1,18 @@
-This is a python lib, building german names for very big numbers; together with a console application, using it.
-See http://de.wikipedia.org/wiki/Zahlennamen#Nomenklatur_f.C3.BCr_Zahlen_ab_1_000_000 for details.
+This is a python lib, building names for very big numbers; together with a console application, using it.
+Per default, we use the long scale system, as used in most parts of the EU; --shortScale or -s will use the us/uk system.
+See http://de.wikipedia.org/wiki/Zahlennamen#Nomenklatur_f.C3.BCr_Zahlen_ab_1_000_000 and
+https://en.wikipedia.org/wiki/Names_of_large_numbers
+for details.
 
 Usage
 =====
 
 say.py --help
-usage: say.py [-G] [-GG] [-GGG] [-h] [-e] [-SL] [-v] [-c] [-C] [-n] [-f] [-U]
-              [-b] [-l] [-g] [-L LOCALE] [-z | -r]
+usage: say.py [-G] [-GG] [-GGG] [-U] [-h] [-e] [-SL] [-v] [-c] [-C] [-s] [-n]
+              [-f] [-u] [-b] [-l] [-g] [-d [DELIMITER]] [-L LOCALE] [-z | -r]
               [number]
 
-Write german names of (very) big numbers.
+Write names of (very) big numbers.
 
 select one of these:
   number                say this number
@@ -17,6 +20,7 @@ select one of these:
   -GG, --googolplex     say a googolplex (10^googol)
   -GGG, --googolplexplex
                         say a googolplexplex (10^googolplex)
+  -U, --universe        say the number of atoms in the universe
 
 help:
   -h, --help            show this help message and exit
@@ -27,16 +31,19 @@ help:
   -C, --fullLicence     show licence file and exit; tries to download and save licence, if not available
 
 optional arguments:
+  -s, --shortScale      use american style: 1 000 000 000 is 1 billion; 1 milliarde if not set - implicit using -l
   -n, --numeric         say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits
   -f, --force           ignore size warnings
-  -U, --noUmlaut        use ue and oe instead of german umlaut; this might become handy, if you cannot change your terminal's encoding
+  -u, --noUmlaut        use ue and oe instead of german umlaut; this might become handy, if you cannot change your terminal's encoding
 
 format:
   -b, --byLine          write components line by line
   -l, --latinOnly       say "123 millionen" instead of "einhundertdreiundzwanzigmillionen"
   -g, --grouping        group thousand blocks; implicit using -n
+  -d [DELIMITER], --delimiter [DELIMITER]
+                        separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the numbers get build
   -L LOCALE, --locale LOCALE
-                        use this locale for formatting numbers; only useful with -g/--grouping
+                        locale for formatting numbers; only useful with -g/--grouping
 
 number:
   -z, --zeros           do not say given number, but the number with that many zeros
@@ -47,13 +54,17 @@ Examples
 
 say.py --example shows complete examples.
 
+say.py --zeros 9
+milliarde
+
+say.py --zeros --shortScale 9
+billion
+
 say.py 123
 einhundertdreiundzwanzig
 
 say.py 9999999345349583045894
-neuntrilliardenneunhundertneunundneunzigtrillionenneunhundertneunundneunzigbilli
-ardendreihundertf³nfundvierzigbillionendreihundertneunundvierzigmilliardenf³nfhu
-ndertdreiundachtzigmillionenf³nfundvierzigtausendachthundertvierundneunzig
+neuntrilliardenneunhundertneunundneunzigtrillionenneunhundertneunundneunzigbilliardendreihundertfünfundvierzigbillionendreihundertneunundvierzigmilliardenfünfhundertdreiundachtzigmillionenfünfundvierzigtausendachthundertvierundneunzig
 
 say.py --zeros 123
 vigintilliarde
@@ -62,9 +73,10 @@ say.py --zeros 1000000
 10 sesexagintazentillisesexagintaseszentilliarden
 
 say.py --zeros 9999999345349583045894
-100 millisesexagintaseszentillisesexagintaseszentilliseptenquinquagintaquingenti
-llioktoquinquagintaquingentillitresexagintaduzentilliquadragintaoktingentilliduo
-oktogintanongentillionen
+100 millisesexagintaseszentillisesexagintaseszentilliseptenquinquagintaquingentillioktoquinquagintaquingentillitresexagintaduzentilliquadragintaoktingentilliduooktogintanongentillionen
+
+say.py -z 9290823849028419271209381902381 --delimiter
+100 mi-lli-okto-quadraginta-quingenti-lli-septuagintaquadringenti-lli-un-quadraginta-seszenti-lli-quattuor-quingenti-lli-ses-triginta-septingenti-lli-quinqua-quadraginta-quingenti-lli-un-duzenti-lli-tre-sexaginta-quingenti-lli-quinquagintaseszenti-lli-se-nonaginta-trezenti-lliarden
 
 say.py --random 123
 siebenhundertvierundsechzigvigintillioneneinhundertvierzignovendezilliardene ... izigtausenddreihundertvierzehn
@@ -90,11 +102,7 @@ say.py --googol --numeric --grouping
 zehnsedezilliarden
 
 say.py --googolplex
-10 millisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentil
-lisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisese
-xagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagint
-aseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintasesze
-ntillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentilliarden
+10 millisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentilliarden
 
 say.py --locale german -n 100000000000 -f -g
 100.000.000.000
