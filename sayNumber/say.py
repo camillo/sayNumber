@@ -12,8 +12,14 @@ import os
 import argparse
 import locale
 
-UNIVERSE = 10 ** 78
-GOOGOL = 10 ** 100
+NAMED_NUMBERS = {
+    'human': 7 * 10 ** 27,
+    'earth': 6 * 10 ** 49,
+    'sun': 6 * 10 ** 57,
+    'milkyWay': 10 ** 68,
+    'universe': 10 ** 78,
+    'googol': 10 ** 100
+}
 
 
 class MessageAction(argparse._HelpAction):
@@ -210,13 +216,21 @@ def validLocale(value):
     return value
 
 
+def validDelimiter(value):
+    """ Check that delimiter does not contains a lower char """
+    import string
+    if set(string.lowercase).intersection(value):
+        raise argparse.ArgumentTypeError("value must not contain a-z")
+    return value
+
+
 def main(args):
     from german import say, sayByExp
     number = args.number
     if args.googol or args.googolplex:
-        number = GOOGOL
-    elif args.universe:
-        number = UNIVERSE
+        number = NAMED_NUMBERS['googol']
+    elif args.namedNumber:
+        number = args.namedNumber
     if args.zeros or args.googolplex:
         # Do not say given number, but the number with that many zeros.
         zeros, zerosLeft = divmod(number, 3)
@@ -254,7 +268,16 @@ def createParser():
     group.add_argument('-G', '--googol', action="store_true", help='say a googol (10^100)')
     group.add_argument('-GG', '--googolplex', action="store_true", help='say a googolplex (10^googol)')
     group.add_argument('-GGG', '--googolplexplex', action=GoogolplexplexAction, help='say a googolplexplex (10^googolplex)')
-    group.add_argument('-U', '--universe', action="store_true", help='say the number of atoms in the universe')
+    group.add_argument('-H', '--human', action="store_const", const=NAMED_NUMBERS['human'], dest="namedNumber",
+                       help='say the number of atoms, in a 70 kg human')
+    group.add_argument('-E', '--earth', action="store_const", const=NAMED_NUMBERS['earth'], dest="namedNumber",
+                       help='say the number of atoms of the earth')
+    group.add_argument('-S', '--sun', action="store_const", const=NAMED_NUMBERS['sun'], dest="namedNumber",
+                       help='say the number of atoms of the sun')
+    group.add_argument('-M', '--milkyWay', action="store_const", const=NAMED_NUMBERS['milkyWay'], dest="namedNumber",
+                       help='say the number of atoms in our galaxy')
+    group.add_argument('-U', '--universe', action="store_const", const=NAMED_NUMBERS['universe'], dest="namedNumber",
+                       help='say the number of atoms in the universe')
 
     group = parser.add_argument_group('help')
     group.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
@@ -286,7 +309,7 @@ def createParser():
                        help='say "123 millionen" instead of "einhundertdreiundzwanzigmillionen"')
     group.add_argument('-g', '--grouping', dest='grouping', action=GroupingAction,
                        help="group thousand blocks; implicit using -n")
-    group.add_argument('-d', '--delimiter', nargs="?", const='-', dest='delimiter', default='',
+    group.add_argument('-d', '--delimiter', nargs="?", const='-', dest='delimiter', default='', type=validDelimiter,
                        help="separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the numbers get build")
     group.add_argument('-L', '--locale', dest="locale", nargs=1, type=validLocale, default='',
                        help='locale for formatting numbers; only useful with -g/--grouping')
@@ -306,8 +329,8 @@ def parseCommandlineArguments():
     args = parser.parse_args()
     if args.numeric:
         number = args.number
-        if args.universe:
-            number = UNIVERSE
+        if args.namedNumber:
+            number = args.namedNumber
         if (args.zeros or args.random) and number > sys.maxint:
             locale.setlocale(locale.LC_NUMERIC, '')
             parser.exit(status=3, message="When using -n/--numeric, together with -z/--zeros or -r/--random, number must be less or equal " + locale.format("%d", sys.maxint, grouping=True))

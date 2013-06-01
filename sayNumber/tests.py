@@ -255,3 +255,6 @@ class ShortScaleTest(unittest.TestCase):
         self.assertEqual('duocentillion', _sayShortScale(309))
 
 
+class DelimiterTest(unittest.TestCase):
+    def testTresZenti(self):
+        self.assertEqual('tres-zenti', _sayLatin(103, delimiter="-"))

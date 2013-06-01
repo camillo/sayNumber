@@ -8,8 +8,9 @@ Usage
 =====
 
 say.py --help
-usage: say.py [-G] [-GG] [-GGG] [-U] [-h] [-e] [-SL] [-v] [-c] [-C] [-s] [-n]
-              [-f] [-u] [-b] [-l] [-g] [-d [DELIMITER]] [-L LOCALE] [-z | -r]
+usage: say.py [-G] [-GG] [-GGG] [-H] [-E] [-S] [-M] [-U] [-h] [-e] [-SL] [-v]
+              [-c] [-C] [-s] [-n] [-f] [-u] [-b] [-l] [-g] [-d [DELIMITER]]
+              [-L LOCALE] [-z | -r]
               [number]
 
 Write names of (very) big numbers.
@@ -20,6 +21,10 @@ select one of these:
   -GG, --googolplex     say a googolplex (10^googol)
   -GGG, --googolplexplex
                         say a googolplexplex (10^googolplex)
+  -H, --human           say the number of atoms, in a 70 kg human
+  -E, --earth           say the number of atoms of the earth
+  -S, --sun             say the number of atoms of the sun
+  -M, --milkyWay        say the number of atoms in our galaxy
   -U, --universe        say the number of atoms in the universe
 
 help:
