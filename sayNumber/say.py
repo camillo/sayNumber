@@ -13,6 +13,8 @@ import argparse
 import locale
 
 NAMED_NUMBERS = {
+    'time': int(4.354 * 10 ** 17),
+    'avogadro': int(6.02214129 * 10 ** 23),
     'human': 7 * 10 ** 27,
     'earth': 6 * 10 ** 49,
     'sun': 6 * 10 ** 57,
@@ -191,6 +193,13 @@ class ShortScaleAction(argparse._StoreTrueAction):
         args.latinOnly = True
 
 
+class NumericOnlyAction(argparse._StoreTrueAction):
+    """ Add numeric argument if numericOnly is used """
+    def __call__(self, parser, args, values, option=None):
+        args.numeric = True
+        args.numericOnly = True
+
+
 def atLeastZero(value):
     """ Check that value is numeric and >= 0 """
     try:
@@ -251,10 +260,11 @@ def main(args):
         numeric = number
     if args.numeric:
         print locale.format("%d", int(numeric), grouping=args.grouping)
-    if args.noUmlaut:
-        print ret.replace("ö", "oe").replace("ü", "ue")
-    else:
-        print ret.decode('latin-1')
+    if not args.numericOnly:
+        if args.noUmlaut:
+            print ret.replace("ö", "oe").replace("ü", "ue")
+        else:
+            print ret.decode('latin-1')
 
 
 def createParser():
@@ -265,11 +275,12 @@ def createParser():
 
     group = parser.add_argument_group("select one of these").add_mutually_exclusive_group(required=True)
     group.add_argument('number', nargs="?", type=atLeastZero, help='say this number')
-    group.add_argument('-G', '--googol', action="store_true", help='say a googol (10^100)')
-    group.add_argument('-GG', '--googolplex', action="store_true", help='say a googolplex (10^googol)')
-    group.add_argument('-GGG', '--googolplexplex', action=GoogolplexplexAction, help='say a googolplexplex (10^googolplex)')
+    group.add_argument('-T', '--time', action="store_const", const=NAMED_NUMBERS['time'], dest="namedNumber",
+                       help='say the number of seconds the universe exists')
+    group.add_argument('-A', '--avogadro', action="store_const", const=NAMED_NUMBERS['avogadro'], dest="namedNumber",
+                       help='say the avogadro constant; atoms in 12g carbon')
     group.add_argument('-H', '--human', action="store_const", const=NAMED_NUMBERS['human'], dest="namedNumber",
-                       help='say the number of atoms, in a 70 kg human')
+                       help='say the number of atoms of a 70 kg human')
     group.add_argument('-E', '--earth', action="store_const", const=NAMED_NUMBERS['earth'], dest="namedNumber",
                        help='say the number of atoms of the earth')
     group.add_argument('-S', '--sun', action="store_const", const=NAMED_NUMBERS['sun'], dest="namedNumber",
@@ -278,6 +289,9 @@ def createParser():
                        help='say the number of atoms in our galaxy')
     group.add_argument('-U', '--universe', action="store_const", const=NAMED_NUMBERS['universe'], dest="namedNumber",
                        help='say the number of atoms in the universe')
+    group.add_argument('-G', '--googol', action="store_true", help='say a googol (10^100)')
+    group.add_argument('-GG', '--googolplex', action="store_true", help='say a googolplex (10^googol)')
+    group.add_argument('-GGG', '--googolplexplex', action=GoogolplexplexAction, help='say a googolplexplex (10^googolplex)')
 
     group = parser.add_argument_group('help')
     group.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
@@ -297,6 +311,8 @@ def createParser():
                        help="use american style: 1 000 000 000 is 1 billion; 1 milliarde if not set - implicit using -l")
     group.add_argument('-n', '--numeric', dest='numeric', action='store_true',
                        help="say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits")
+    group.add_argument('-N', '--numericOnly', dest='numericOnly', action=NumericOnlyAction,
+                       help="say the number only in numeric form")
     group.add_argument('-f', '--force', dest='force', action='store_true',
                        help="ignore size warnings")
     group.add_argument('-u', '--noUmlaut', dest='noUmlaut', action='store_true',
@@ -312,7 +328,7 @@ def createParser():
     group.add_argument('-d', '--delimiter', nargs="?", const='-', dest='delimiter', default='', type=validDelimiter,
                        help="separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the numbers get build")
     group.add_argument('-L', '--locale', dest="locale", nargs=1, type=validLocale, default='',
-                       help='locale for formatting numbers; only useful with -g/--grouping')
+                       help='locale for formatting numbers; only useful with -g/--grouping (see -SL/--showLocales)')
 
     group = parser.add_argument_group('number').add_mutually_exclusive_group()
     group.add_argument('-z', '--zeros', dest='zeros', action='store_true',
