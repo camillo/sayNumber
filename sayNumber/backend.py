@@ -5,6 +5,9 @@
 # https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
 
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 # German has a lot of exceptions during the first 20 numbers, so easiest thing is
 # to collect them in a dict, instead of writing special code.
@@ -57,7 +60,7 @@ def _sayLatin(number, delimiter=''):
     """
     if not 0 < number < 1000:
         raise ValueError("Number must be 1-999; given: [%s]." % number)
-
+    logger.debug("say latin: %s", number)
     one = number % 10
     ten = (number - one) % 100
     hundred = number - ten - one
@@ -106,6 +109,7 @@ def _sayLongScale(zeros, plural=False, delimiter=''):
         if current == 0:
             # This is the prefix for 000
             prefix = "ni" + delimiter
+            logger.debug("say latin: 000")
         else:
             prefix = _sayLatin(current, delimiter)
             # If we combine a ten prefix, without a hundred prefix, the 'a' changes to 'i' if present at last position.

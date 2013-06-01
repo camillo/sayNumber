@@ -1,4 +1,4 @@
-# This project is about saying numbers of all sizes
+# Names for all(!) numbers
 
 One for the category 'senseless knowledge': every number, regardless of its size, has a name.
 
@@ -138,7 +138,13 @@ number:
 </pre>
 
 
-## List numbers, with their latin names
+## List of numbers, with their latin names
+To generate the list yourself:
+```python
+from sayNumber.backend import _sayLatin
+names = [_sayLatin(number) for number in range(1, 1000)]
+```
+
 | number | name | number | name | number | name |
 | ------------- |-------------| -------------|-------------|-------------|-------------|-------------|-------------|
 |1 | mi |2 | bi |3 | tri |

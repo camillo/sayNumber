@@ -5,7 +5,7 @@
 # https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
 
 import unittest
-from german import say, _splitThousandBlocks, _sayLatin, _sayLongScale, _sayShortScale
+from backend import say, _splitThousandBlocks, _sayLatin, _sayLongScale, _sayShortScale
 
 
 class TestInternal(unittest.TestCase):

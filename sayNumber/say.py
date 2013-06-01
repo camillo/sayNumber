@@ -234,7 +234,7 @@ def validDelimiter(value):
 
 
 def main(args):
-    from german import say, sayByExp
+    from backend import say, sayByExp
     number = args.number
     if args.googol or args.googolplex:
         number = NAMED_NUMBERS['googol']
