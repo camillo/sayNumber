@@ -34,7 +34,7 @@ class MessageAction(argparse._HelpAction):
             parser.error(ex.message)
 
     def message(self):
-        raise NotImplementedError("Not implemented yet.")
+        raise NotImplementedError("Abstract method; needs to get overridden.")
 
 
 class ExampleAction(MessageAction):

@@ -5,13 +5,14 @@
 # https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
 
 import os
+import string
 import logging
 
 logger = logging.getLogger(__name__)
 
 # German has a lot of exceptions during the first 20 numbers, so easiest thing is
 # to collect them in a dict, instead of writing special code.
-SMALL_NUMBERS = {
+GERMAN_SMALL_NUMBERS = {
     '0': 'null',      '1': 'eins',       '2': 'zwei',       '3': 'drei',      '4': 'vier',
     '5': 'fünf',      '6': 'sechs',      '7': 'sieben',     '8': 'acht',      '9': 'neun',
     '10': 'zehn',     '11': 'elf',       '12': 'zwölf',     '13': 'dreizehn', '14': 'vierzehn',
@@ -25,7 +26,6 @@ GERMAN_DEZI_EXCEPTIONS = {
 }
 
 # These are the prefixes to build latin numbers.
-# @see http://de.wikipedia.org/wiki/Zahlennamen#Nomenklatur_f.C3.BCr_Zahlen_ab_1_000_000 for details.
 LATIN_PREFIXES = [
     # 0: list of one-prefixes, that stands alone (numbers 1-9)
     ['mi', 'bi', 'tri', 'quadri', 'quinti', 'sexti', 'septi', 'okti', 'noni'],
@@ -46,7 +46,7 @@ ALONE_ONES, COMBINE_ONES, TENS, HUNDREDS = 0, 1, 2, 3
 # 1. quinquadezi has a different name: quindezi
 # 2. 103 would normally be trezenti, but this is reserved for 300. This is, why 103 is treszenti.
 COMBINE_EXCEPTIONS = {
-    'quinquadezi': ['quindezi', ],
+    'quinquadezi': ['quin', 'dezi'],
     'trezenti': ['tres', 'zenti']
 }
 
@@ -60,11 +60,16 @@ def _sayLatin(number, delimiter=''):
     """
     if not 0 < number < 1000:
         raise ValueError("Number must be 1-999; given: [%s]." % number)
+    if delimiter and delimiter in string.ascii_lowercase:
+        raise ValueError("Delimiter must not be a-z.")
     logger.debug("say latin: %s", number)
+
     one = number % 10
     ten = (number - one) % 100
     hundred = number - ten - one
     oneIndex, tenIndex, hundredIndex = one - 1, ten / 10 - 1, hundred / 100 - 1
+
+    combineHundredIfNeeded = lambda ret: ret + delimiter + LATIN_PREFIXES[HUNDREDS][hundredIndex][0] if hundred else ret
 
     if ten == 0 and hundred == 0:
         return LATIN_PREFIXES[ALONE_ONES][oneIndex]
@@ -73,11 +78,11 @@ def _sayLatin(number, delimiter=''):
             return LATIN_PREFIXES[HUNDREDS][hundredIndex][0]
         else:
             ret = LATIN_PREFIXES[TENS][tenIndex][0]
-            return ret + delimiter + LATIN_PREFIXES[HUNDREDS][hundredIndex][0] if hundred else ret
+            return combineHundredIfNeeded(ret)
 
     onePrefix = LATIN_PREFIXES[COMBINE_ONES][oneIndex]
 
-    def combineOnePrefix(one, other):
+    def combineOne(one, other):
         """ Combine the one prefix, with a ten or hundred. """
         additionalCharacter = set(one[1:]).intersection(other[1:])
         ret = one[0] + (additionalCharacter.pop() if additionalCharacter else '') + delimiter + other[0]
@@ -85,9 +90,9 @@ def _sayLatin(number, delimiter=''):
         return delimiter.join(exception) if exception else ret
 
     if ten == 0:
-        return combineOnePrefix(onePrefix, LATIN_PREFIXES[HUNDREDS][hundredIndex])
-    ret = combineOnePrefix(onePrefix, LATIN_PREFIXES[TENS][tenIndex])
-    return ret + delimiter + LATIN_PREFIXES[HUNDREDS][hundredIndex][0] if hundred else ret
+        return combineOne(onePrefix, LATIN_PREFIXES[HUNDREDS][hundredIndex])
+    ret = combineOne(onePrefix, LATIN_PREFIXES[TENS][tenIndex])
+    return combineHundredIfNeeded(ret)
 
 
 def _sayLongScale(zeros, plural=False, delimiter=''):
@@ -143,7 +148,7 @@ def _sayShortScale(zeros, plural=False, delimiter=''):
         raise ValueError('Zeros must be 6 or greater.')
     if zeros % 3 > 0:
         raise ValueError("Zeros mod 3 must be 0.")
-    longScaleZeros = zeros + (zeros / 3 - 2) * 3
+    longScaleZeros = 2 * zeros - 6
     ret = _sayLongScale(longScaleZeros, plural=False, delimiter=delimiter).replace('z', 'c')
 
     return ret + "s" if plural else ret
@@ -173,14 +178,14 @@ def sayByExp(zeros, plural=False, delimiter='', shortScale=False):
     return ret
 
 
-def _sayShortNumber(shortNumber, sayEin):
+def _sayGermanShortNumber(shortNumber, sayEin):
     """
     Helper to say a short number, that is used before another part (neunzehn millionen or eine million or ein tausend)
     @param sayEin True to say ein, instead of eine in case of shortNmuber == 1
     """
     if shortNumber == "1":
         return "ein" if sayEin else "eine"
-    return SMALL_NUMBERS[shortNumber]
+    return GERMAN_SMALL_NUMBERS[shortNumber]
 
 
 def _sayGerman(number, componentsLeft):
@@ -191,22 +196,22 @@ def _sayGerman(number, componentsLeft):
     if not 0 <= int(number) <= 999:
         raise ValueError("Number must be 0-999")
     number = str(number)
-    if number in SMALL_NUMBERS:
-        return _sayShortNumber(number, componentsLeft == 2)
+    if number in GERMAN_SMALL_NUMBERS:
+        return _sayGermanShortNumber(number, componentsLeft == 2)
     currentLen = len(number)
     ret = ""
     if currentLen == 3:
         if not number[0] == "0":
-            ret = _sayShortNumber(number[0], sayEin=True) + "hundert"
+            ret = _sayGermanShortNumber(number[0], sayEin=True) + "hundert"
         return ret + _sayGerman(number[1:], componentsLeft)
 
     if number[0] == "0":
         if number[1] == "0":
             return ""
-        return SMALL_NUMBERS[number[1]]
+        return GERMAN_SMALL_NUMBERS[number[1]]
     if not number[1] == "0":
-        ret = _sayShortNumber(number[1], sayEin=True) + "und"
-    ret += GERMAN_DEZI_EXCEPTIONS.get(number[0], SMALL_NUMBERS[number[0]]) + "zig"
+        ret = _sayGermanShortNumber(number[1], sayEin=True) + "und"
+    ret += GERMAN_DEZI_EXCEPTIONS.get(number[0], GERMAN_SMALL_NUMBERS[number[0]]) + "zig"
     return ret
 
 
@@ -229,15 +234,16 @@ def _splitThousandBlocks(number):
 
 def say(number, byLine=False, latinOnly=False, delimiter='', shortScale=False):
     """
-    Build the german world for given number, using the long scale system.
+    Build the  world for given number.
     @param number The number to build (can be a string or int).
     @param byLine True, if a \n should be added between the parts of the spoken word.
     @param latinOnly If True build "123 millionen"; "einhundertdreiundzwanzingmillionen" otherwise.
-    @return the german word for given number.
+    @param shortScale True, if the us system should be used.
+    @return the word for given number.
     """
     number = str(number)
-    if number in SMALL_NUMBERS:
-        return SMALL_NUMBERS[number]
+    if number in GERMAN_SMALL_NUMBERS:
+        return GERMAN_SMALL_NUMBERS[number]
     blocks = _splitThousandBlocks(number)
     blocksLeft = len(blocks)
     ret = ""
