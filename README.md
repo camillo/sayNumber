@@ -88,8 +88,8 @@ arguments. Simplest call: ./say.py 94283203948239048209482409283490...2840923432
 
 <pre>
 usage: say.py [-T] [-A] [-H] [-E] [-S] [-M] [-U] [-G] [-GG] [-GGG] [-h] [-e]
-              [-SL] [-v] [-c] [-C] [-s] [-n] [-N] [-f] [-u] [-b] [-l] [-g]
-              [-d [DELIMITER]] [-L LOCALE] [-z | -r]
+              [-SL] [-v] [-c] [-C] [-s] [-ch] [-n] [-N | -sy] [-f] [-u] [-b]
+              [-l] [-g] [-d [DELIMITER]] [-L LOCALE] [-z | -r]
               [number]
 
 Write names of (very) big numbers.
@@ -118,8 +118,10 @@ help:
 
 optional arguments:
   -s, --shortScale      use american style: 1 000 000 000 is 1 billion; 1 milliarde if not set - implicit using -l
+  -ch, --chuquet        use old latin prefixes like duodeviginti for oktodezi
   -n, --numeric         say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits
   -N, --numericOnly     say the number only in numeric form
+  -sy, --synonym        say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion
   -f, --force           ignore size warnings
   -u, --noUmlaut        use ue and oe instead of german umlaut; this might become handy, if you cannot change your terminal's encoding
 

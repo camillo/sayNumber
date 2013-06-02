@@ -57,26 +57,41 @@ LATIN_SYNONYMS = {
     5: ['quinqui', ]
 }
 
+# This are the latin prefixes, using old latin numbers as invented by Nicolas Chuquet
+CHUQUET_PREFIXES = {
+    18: ['duo', 'de', 'viginti'],      59: ['un', 'de', 'sexaginta'],
+    19: ['un', 'de', 'viginti'],       68: ['duo', 'de', 'septuaginta'],
+    28: ['duo', 'de', 'triginta'],     69: ['un', 'de', 'septuaginta'],
+    29: ['un', 'de', 'triginta'],      78: ['duo', 'de', 'octoginta'],
+    38: ['duo', 'de', 'quadraginta'],  79: ['un', 'de', 'octoginta'],
+    39: ['un', 'de', 'quadraginta'],   88: ['duo', 'de', 'nonaginta'],
+    48: ['duo', 'de', 'quinquaginta'], 89: ['un', 'de', 'nonaginta'],
+    49: ['un', 'de', 'quinquaginta'],  98: ['duo', 'de', 'centi'],
+    58: ['duo', 'de', 'sexaginta'],    99: ['un', 'de', 'centi'],
+}
 
-def _sayLatin(number, delimiter='', synonym=False):
+
+def _sayLatin(numberToSay, delimiter='', synonym=False, chuquet=False, **_):
     """
     Build the latin word for given number.
-    @param number int from 1 to 999.
+    @param numberToSay int from 1 to 999.
     @param delimiter Separates the prefixes
     @return The latin word for given number.
     """
-    if not 0 < number < 1000:
-        raise ValueError("Number must be 1-999; given: [%s]." % number)
+    if not 0 < numberToSay < 1000:
+        raise ValueError("Number must be 1-999; given: [%s]." % numberToSay)
     if delimiter and delimiter in string.ascii_lowercase:
         raise ValueError("Delimiter must not be a-z.")
-    logger.debug("say latin: %s", number)
+    logger.debug("say latin: %s", numberToSay)
 
-    if synonym and number in LATIN_SYNONYMS:
-        return delimiter.join(LATIN_SYNONYMS[number])
+    if chuquet and numberToSay in CHUQUET_PREFIXES:
+        return delimiter.join(CHUQUET_PREFIXES[numberToSay])
+    if synonym and numberToSay in LATIN_SYNONYMS:
+        return delimiter.join(LATIN_SYNONYMS[numberToSay])
 
-    one = number % 10
-    ten = (number - one) % 100
-    hundred = number - ten - one
+    one = numberToSay % 10
+    ten = (numberToSay - one) % 100
+    hundred = numberToSay - ten - one
 
     hundredPrefix = LATIN_PREFIXES[HUNDREDS][hundred / 100 - 1] if hundred else None
     tenPrefix = LATIN_PREFIXES[TENS][ten / 10 - 1] if ten else None
@@ -107,18 +122,18 @@ def _sayLatin(number, delimiter='', synonym=False):
     return combineHundredIfNeeded(ret)
 
 
-def _sayLongScale(zeros, plural=False, delimiter='', synonym=False):
+def _sayLongScale(zerosAfterOne, plural=False, delimiter='', **kwargs):
     """
     Build the word for the number, starting with a 1, followed by as many 0 as specified in zeros.
-    @param zeros the number of "0"s, following the "1". Must be 6 at least and zeros mod 3 == 0.
+    @param zerosAfterOne the number of "0"s, following the "1". Must be 6 at least and zeros mod 3 == 0.
     @param plural True, if the plural form should be returned, False for singular.
     @return the word, using the long scale system.
     """
-    if zeros < 6:
+    if zerosAfterOne < 6:
         raise ValueError('Zeros must be 6 or greater.')
-    if zeros % 3 > 0:
+    if zerosAfterOne % 3 > 0:
         raise ValueError("Zeros mod 3 must be 0.")
-    sixes, lliarde = divmod(zeros, 6)
+    sixes, lliarde = divmod(zerosAfterOne, 6)
     ret = ""
     while sixes > 0:
         # We do one thousand block per iteration, starting with the the lowest value.
@@ -128,7 +143,7 @@ def _sayLongScale(zeros, plural=False, delimiter='', synonym=False):
             prefix = "ni" + delimiter
             logger.debug("say latin: 000")
         else:
-            prefix = _sayLatin(current, delimiter, synonym)
+            prefix = _sayLatin(current, delimiter, **kwargs)
             # If we combine a ten prefix, without a hundred prefix, the 'a' changes to 'i' if present at last position.
             if 100 > current > 9 and prefix[-1] == "a":
                 prefix = prefix[:-1] + 'i'
@@ -149,7 +164,7 @@ def _sayLongScale(zeros, plural=False, delimiter='', synonym=False):
     return ret + pluralPostfix if plural else ret
 
 
-def _sayShortScale(zeros, plural=False, delimiter='', synonym=False):
+def _sayShortScale(zeros, plural=False, **kwargs):
     """
     Build the word for the number, starting with a 1, followed by as many 0 as specified in zeros.
     @param zeros the number of "0"s, following the "1". Must be 6 at least and zeros mod 3 == 0.
@@ -161,32 +176,32 @@ def _sayShortScale(zeros, plural=False, delimiter='', synonym=False):
     if zeros % 3 > 0:
         raise ValueError("Zeros mod 3 must be 0.")
     longScaleZeros = 2 * zeros - 6
-    ret = _sayLongScale(longScaleZeros, plural=False, delimiter=delimiter, synonym=synonym).replace('z', 'c')
+    ret = _sayLongScale(longScaleZeros, plural=False, **kwargs).replace("z", "c")
 
     return ret + "s" if plural else ret
 
 
-def sayByExp(zeros, plural=False, delimiter='', shortScale=False, synonym=False):
+def sayByExp(zerosAfterOne, plural=False, shortScale=False, **kwargs):
     """
     Build the word for the number, starting with a 1, followed by as many "0" as specified in zeros.
-    @param zeros the number of "0", following the "1". Must be 3 at least and zeros % 3 == 0.
+    @param zerosAfterOne the number of "0", following the "1". Must be 3 at least and zeros % 3 == 0.
     @param plural True, if the plural form should be returned, False for singular.
     @param delimiter Separates the latin prefixes.
     @param shortScale True, to use us/uk system, german otherwise
     """
-    if zeros < 3:
+    if zerosAfterOne < 3:
         raise ValueError('Zeros must be 3 or greater.')
-    if zeros % 3 > 0:
+    if zerosAfterOne % 3 > 0:
         raise ValueError("Zeros mod 3 must be 0.")
-    if zeros == 3:
+    if zerosAfterOne == 3:
         if shortScale:
             ret = "thousand"
         else:
             ret = "tausend"
     elif shortScale:
-        ret = _sayShortScale(zeros, plural, delimiter, synonym)
+        ret = _sayShortScale(zerosAfterOne, plural, **kwargs)
     else:
-        ret = _sayLongScale(zeros, plural, delimiter, synonym)
+        ret = _sayLongScale(zerosAfterOne, plural, **kwargs)
     return ret
 
 
@@ -244,7 +259,7 @@ def _splitThousandBlocks(number):
     return ret
 
 
-def say(number, byLine=False, latinOnly=False, delimiter='', shortScale=False, synonym=False):
+def say(number, byLine=False, latinOnly=False, delimiter='', shortScale=False, synonym=False, **_):
     """
     Build the  world for given number.
     @param number The number to build (can be a string or int).

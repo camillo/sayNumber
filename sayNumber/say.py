@@ -245,7 +245,7 @@ def main(args):
         zeros, zerosLeft = divmod(number, 3)
         zeros *= 3
         ret = ("10" if zerosLeft == 1 else "100") + " " if zerosLeft else ""
-        ret += sayByExp(zeros, zerosLeft, delimiter=args.delimiter, shortScale=args.shortScale, synonym=args.synonym)
+        ret += sayByExp(zeros, zerosLeft, **args.__dict__)
         numeric = "1" + "0" * number if args.numeric else None
     elif args.random:
         # Do not say given number, but a random number with that many digits.
@@ -254,9 +254,10 @@ def main(args):
         numeric = random.choice(digits)
         digits.append('0')
         numeric += "".join([random.choice(digits) for _ in range(number - 1)])
-        ret = say(numeric, byLine=args.byLine, latinOnly=args.latinOnly, delimiter=args.delimiter, shortScale=args.shortScale, synonym=args.synonym)
+        args.number = numeric
+        ret = say(**args.__dict__)
     else:
-        ret = say(number, byLine=args.byLine, latinOnly=args.latinOnly, delimiter=args.delimiter, shortScale=args.shortScale, synonym=args.synonym)
+        ret = say(**args.__dict__)
         numeric = number
     if args.numeric:
         print locale.format("%d", int(numeric), grouping=args.grouping)
@@ -309,6 +310,8 @@ def createParser():
     group = parser.add_argument_group('optional arguments')
     group.add_argument('-s', '--shortScale', dest='shortScale', action=ShortScaleAction,
                        help="use american style: 1 000 000 000 is 1 billion; 1 milliarde if not set - implicit using -l")
+    group.add_argument('-ch', '--chuquet', dest='chuquet', action='store_true',
+                       help='use old latin prefixes like duodeviginti for oktodezi')
     group.add_argument('-n', '--numeric', dest='numeric', action='store_true',
                        help="say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits")
     innerGroup = group.add_mutually_exclusive_group()
