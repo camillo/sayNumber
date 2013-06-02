@@ -304,7 +304,7 @@ def createParser():
                             help='say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion')
     innerGroup = group.add_mutually_exclusive_group()
     innerGroup.add_argument('-fz', '--forceZ', dest='forceZ', action='store_true',
-                            help="always use z, instead of c; per default we say duozentillion in long scale and duocentillion in long scale (default)")
+                            help="always use z, instead of c; per default we say duozentillion in long scale (default) and duocentillion in short scale")
     innerGroup.add_argument('-fc', '--forceC', dest='forceC', action='store_true',
                             help="always use c, instead of z")
     group.add_argument('-f', '--force', dest='force', action='store_true',
