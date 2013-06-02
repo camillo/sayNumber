@@ -2,7 +2,7 @@
 # https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
 
 import string
-from logging import getLogger
+from logging import getLogger, DEBUG
 from latinNumbers import LATIN_NUMBERS, LATIN_SYNONYMS, CHUQUET_PREFIXES
 
 logger = getLogger(__name__)
@@ -11,13 +11,16 @@ logger = getLogger(__name__)
 def sayLatin(numberToSay, delimiter='', synonym=False, chuquet=False, **_):
     if not 0 <= numberToSay < 1000:
         raise ValueError("Number must be 0-999; given: [%s]." % numberToSay)
-    logger.debug("say latin: %s", numberToSay)
 
     if chuquet and numberToSay in CHUQUET_PREFIXES:
-        return delimiter.join(CHUQUET_PREFIXES[numberToSay])
-    if synonym and numberToSay in LATIN_SYNONYMS:
-        return delimiter.join(LATIN_SYNONYMS[numberToSay])
-    return delimiter.join(LATIN_NUMBERS[numberToSay])
+        target = CHUQUET_PREFIXES[numberToSay]
+    elif synonym and numberToSay in LATIN_SYNONYMS:
+        target = LATIN_SYNONYMS[numberToSay]
+    else:
+        target = LATIN_NUMBERS[numberToSay]
+    if logger.isEnabledFor(DEBUG):
+        logger.debug("%s -> %s", numberToSay, "-".join(target))
+    return delimiter.join(target)
 
 
 # *************************************************************************

@@ -89,7 +89,7 @@ arguments. Simplest call: ./say.py 94283203948239048209482409283490...2840923432
 <pre>
 usage: say.py [-T] [-A] [-H] [-E] [-S] [-M] [-U] [-G] [-GG] [-GGG] [-h] [-e]
               [-SL] [-v] [-c] [-C] [-s] [-ch] [-n] [-N | -sy] [-fz | -fc] [-f]
-              [-b] [-g] [-d [DELIMITER]] [-L LOCALE] [-z | -r]
+              [-V] [-b] [-g] [-d [DELIMITER]] [-L LOCALE] [-z | -r]
               [number]
 
 Write names of (very) big numbers.
@@ -125,12 +125,13 @@ optional arguments:
   -fz, --forceZ         always use z, instead of c; per default we say duozentillion in long scale and duocentillion in long scale (default)
   -fc, --forceC         always use c, instead of z
   -f, --force           ignore size warnings
+  -V, --verbose         output debug information; very useful to understand how words get build
 
 format:
   -b, --byLine          write components line by line
   -g, --grouping        group thousand blocks; implicit using -n
   -d [DELIMITER], --delimiter [DELIMITER]
-                        separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the numbers get build
+                        separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the words get build
   -L LOCALE, --locale LOCALE
                         locale for formatting numbers; only useful with -g/--grouping (see -SL/--showLocales)
 

@@ -309,6 +309,8 @@ def createParser():
                             help="always use c, instead of z")
     group.add_argument('-f', '--force', dest='force', action='store_true',
                        help="ignore size warnings")
+    group.add_argument('-V', '--verbose', dest='verbose', action='store_true',
+                       help="output debug information; very useful to understand how words get build")
 
     group = parser.add_argument_group('format')
     group.add_argument('-b', '--byLine', dest='byLine', action='store_true',
@@ -316,7 +318,7 @@ def createParser():
     group.add_argument('-g', '--grouping', dest='grouping', action=GroupingAction,
                        help="group thousand blocks; implicit using -n")
     group.add_argument('-d', '--delimiter', nargs="?", const='-', dest='delimiter', default='',
-                       help="separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the numbers get build")
+                       help="separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the words get build")
     group.add_argument('-L', '--locale', dest="locale", nargs=1, type=validLocale, default='',
                        help='locale for formatting numbers; only useful with -g/--grouping (see -SL/--showLocales)')
 
@@ -352,9 +354,19 @@ def parseCommandlineArguments():
     return args
 
 
+def configureLogging(verbose=False, **_):
+    from logging import basicConfig, DEBUG, ERROR
+    if verbose:
+        level = DEBUG
+    else:
+        level = ERROR
+    basicConfig(level=level)
+
+
 if __name__ == "__main__":
     args = parseCommandlineArguments()
     try:
+        configureLogging(**args.__dict__)
         locale.setlocale(locale.LC_NUMERIC, args.locale[0] if args.locale else '')
         main(args)
     except ValueError as ex:
