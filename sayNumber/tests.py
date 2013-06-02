@@ -3,7 +3,8 @@
 # https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
 
 import unittest
-from backend import say, sayByExp, _splitThousandBlocks, _sayLatin, _sayLongScale
+from backend import say, sayByExp, _splitThousandBlocks, _sayLongScale
+from latin import sayLatin as _sayLatin
 
 
 class TestInternal(unittest.TestCase):

@@ -218,14 +218,6 @@ def validLocale(value):
     return value
 
 
-def validDelimiter(value):
-    """ Check that delimiter does not contains a lower char """
-    import string
-    if set(string.lowercase).intersection(value):
-        raise argparse.ArgumentTypeError("value must not contain a-z")
-    return value
-
-
 def main(args):
     from backend import say, sayByExp
     number = args.number
@@ -323,7 +315,7 @@ def createParser():
                        help='write components line by line')
     group.add_argument('-g', '--grouping', dest='grouping', action=GroupingAction,
                        help="group thousand blocks; implicit using -n")
-    group.add_argument('-d', '--delimiter', nargs="?", const='-', dest='delimiter', default='', type=validDelimiter,
+    group.add_argument('-d', '--delimiter', nargs="?", const='-', dest='delimiter', default='',
                        help="separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the numbers get build")
     group.add_argument('-L', '--locale', dest="locale", nargs=1, type=validLocale, default='',
                        help='locale for formatting numbers; only useful with -g/--grouping (see -SL/--showLocales)')
@@ -341,13 +333,13 @@ def parseCommandlineArguments():
     """ Parse the command line arguments, do sanity checks and return ready to use args. """
     parser = createParser()
     args = parser.parse_args()
-    if args.numeric:
-        number = args.number
-        if args.namedNumber:
-            number = args.namedNumber
-        if (args.zeros or args.random) and number > sys.maxint:
-            locale.setlocale(locale.LC_NUMERIC, '')
-            parser.exit(status=3, message="When using -n/--numeric, together with -z/--zeros or -r/--random, number must be less or equal " + locale.format("%d", sys.maxint, grouping=True))
+    number = args.number
+    if args.namedNumber:
+        number = args.namedNumber
+    if (args.zeros or args.random) and number > sys.maxint:
+        locale.setlocale(locale.LC_NUMERIC, '')
+        parser.exit(status=3, message="When using -n/--numeric, together with -z/--zeros or -r/--random, number must be less or equal " + locale.format("%d", sys.maxint, grouping=True))
+    if args.numeric or args.random:
         if number > 150000 and (args.zeros or args.random) and not args.force:
             parser.exit(status=4, message="Building and writing the numeric version of such a big number may take a lot of time. " +
                                           "Depending on the size, it my take minutes or longer." + os.linesep +
