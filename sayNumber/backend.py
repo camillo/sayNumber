@@ -157,10 +157,10 @@ def _sayShortScale(zerosAfterOne, plural=False, **kwargs):
     if zerosAfterOne % 3 > 0:
         raise ValueError("Zeros mod 3 must be 0.")
     longScaleZeros = 2 * zerosAfterOne - 6
-    return _sayLongScale(longScaleZeros, plural=plural, **kwargs).replace("z", "c")
+    return _sayLongScale(longScaleZeros, plural=plural, **kwargs)
 
 
-def sayByExp(zerosAfterOne, plural=False, shortScale=False, **kwargs):
+def sayByExp(zerosAfterOne, plural=False, shortScale=False, forceZ=False, forceC=False, **kwargs):
     """
     Build the word for the number, starting with a 1, followed by as many "0" as specified in zeros.
     @param zerosAfterOne the number of "0", following the "1". Must be 3 at least and zeros % 3 == 0.
@@ -178,6 +178,8 @@ def sayByExp(zerosAfterOne, plural=False, shortScale=False, **kwargs):
         ret = _sayShortScale(zerosAfterOne, plural, **kwargs)
     else:
         ret = _sayLongScale(zerosAfterOne, plural, **kwargs)
+    if forceC or (shortScale and not forceZ):
+        ret = ret.replace("z", "c")
     return ret
 
 

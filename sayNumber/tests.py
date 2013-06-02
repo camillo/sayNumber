@@ -3,7 +3,7 @@
 # https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
 
 import unittest
-from backend import say, _splitThousandBlocks, _sayLatin, _sayLongScale, _sayShortScale
+from backend import say, sayByExp, _splitThousandBlocks, _sayLatin, _sayLongScale
 
 
 class TestInternal(unittest.TestCase):
@@ -126,6 +126,9 @@ class TestLatin(unittest.TestCase):
 
 
 class LongScaleTest(unittest.TestCase):
+    def testForceC(self):
+        self.assertEqual('duocentillion', sayByExp(612, forceC=True))
+
     def test6000(self):
         self.assertEqual('millinillion', _sayLongScale(6000))
         self.assertEqual('millinillinillion', _sayLongScale(6000000))
@@ -144,14 +147,17 @@ class LongScaleTest(unittest.TestCase):
 
 class ShortScaleTest(unittest.TestCase):
     def testTo303(self):
-        self.assertEqual('million', _sayShortScale(6))
-        self.assertEqual('billion', _sayShortScale(9))
-        self.assertEqual('trillion', _sayShortScale(12))
-        self.assertEqual('quadrillion', _sayShortScale(15))
-        self.assertEqual('septendecillion', _sayShortScale(54))
-        self.assertEqual('quadragintillion', _sayShortScale(123))
-        self.assertEqual('centillion', _sayShortScale(303))
-        self.assertEqual('duocentillion', _sayShortScale(309))
+        self.assertEqual('million', sayByExp(6, shortScale=True))
+        self.assertEqual('billion', sayByExp(9, shortScale=True))
+        self.assertEqual('trillion', sayByExp(12, shortScale=True))
+        self.assertEqual('quadrillion', sayByExp(15, shortScale=True))
+        self.assertEqual('septendecillion', sayByExp(54, shortScale=True))
+        self.assertEqual('quadragintillion', sayByExp(123, shortScale=True))
+        self.assertEqual('centillion', sayByExp(303, shortScale=True))
+        self.assertEqual('duocentillion', sayByExp(309, shortScale=True))
+
+    def testForceZ(self):
+        self.assertEqual('duozentillion', sayByExp(309, shortScale=True, forceZ=True))
 
 
 class DelimiterTest(unittest.TestCase):

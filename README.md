@@ -88,8 +88,8 @@ arguments. Simplest call: ./say.py 94283203948239048209482409283490...2840923432
 
 <pre>
 usage: say.py [-T] [-A] [-H] [-E] [-S] [-M] [-U] [-G] [-GG] [-GGG] [-h] [-e]
-              [-SL] [-v] [-c] [-C] [-s] [-ch] [-n] [-N | -sy] [-f] [-b] [-g]
-              [-d [DELIMITER]] [-L LOCALE] [-z | -r]
+              [-SL] [-v] [-c] [-C] [-s] [-ch] [-n] [-N | -sy] [-fz | -fc] [-f]
+              [-b] [-g] [-d [DELIMITER]] [-L LOCALE] [-z | -r]
               [number]
 
 Write names of (very) big numbers.
@@ -122,6 +122,8 @@ optional arguments:
   -n, --numeric         say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits
   -N, --numericOnly     say the number only in numeric form
   -sy, --synonym        say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion
+  -fz, --forceZ         always use z, instead of c; per default we say duozentillion in long scale and duocentillion in long scale (default)
+  -fc, --forceC         always use c, instead of z
   -f, --force           ignore size warnings
 
 format:

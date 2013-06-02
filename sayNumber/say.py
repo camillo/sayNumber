@@ -310,6 +310,11 @@ def createParser():
                             help="say the number only in numeric form")
     innerGroup.add_argument('-sy', '--synonym', dest='synonym', action='store_true',
                             help='say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion')
+    innerGroup = group.add_mutually_exclusive_group()
+    innerGroup.add_argument('-fz', '--forceZ', dest='forceZ', action='store_true',
+                            help="always use z, instead of c; per default we say duozentillion in long scale and duocentillion in long scale (default)")
+    innerGroup.add_argument('-fc', '--forceC', dest='forceC', action='store_true',
+                            help="always use c, instead of z")
     group.add_argument('-f', '--force', dest='force', action='store_true',
                        help="ignore size warnings")
 
