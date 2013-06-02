@@ -145,18 +145,18 @@ def _sayLongScale(zerosAfterOne, plural=False, delimiter='', **kwargs):
     return ret + 's' if plural else ret
 
 
-def _sayShortScale(zeros, plural=False, **kwargs):
+def _sayShortScale(zerosAfterOne, plural=False, **kwargs):
     """
     Build the word for the number, starting with a 1, followed by as many 0 as specified in zeros.
-    @param zeros the number of "0"s, following the "1". Must be 6 at least and zeros mod 3 == 0.
+    @param zerosAfterOne the number of "0"s, following the "1". Must be 6 at least and zeros mod 3 == 0.
     @param plural True, if the plural form should be returned, False for singular.
     @return the word, using the long scale system.
     """
-    if zeros < 6:
+    if zerosAfterOne < 6:
         raise ValueError('Zeros must be 6 or greater.')
-    if zeros % 3 > 0:
+    if zerosAfterOne % 3 > 0:
         raise ValueError("Zeros mod 3 must be 0.")
-    longScaleZeros = 2 * zeros - 6
+    longScaleZeros = 2 * zerosAfterOne - 6
     return _sayLongScale(longScaleZeros, plural=plural, **kwargs).replace("z", "c")
 
 
@@ -198,13 +198,11 @@ def _splitThousandBlocks(number):
     return ret
 
 
-def say(number, byLine=False, latinOnly=False, delimiter='', shortScale=False, synonym=False, **_):
+def say(number, byLine=False, **kwargs):
     """
     Build the  world for given number.
     @param number The number to build (can be a string or int).
     @param byLine True, if a \n should be added between the parts of the spoken word.
-    @param latinOnly If True build "123 millionen"; "einhundertdreiundzwanzingmillionen" otherwise.
-    @param shortScale True, if the us system should be used.
     @return the word for given number.
     """
     number = str(number)
@@ -224,7 +222,7 @@ def say(number, byLine=False, latinOnly=False, delimiter='', shortScale=False, s
             if blocksLeft > 1:
                 ret += " "
             if blocksLeft > 1:
-                ret += sayByExp((blocksLeft - 1) * 3, plural=int(thousandBlock) > 1, delimiter=delimiter, shortScale=shortScale, synonym=synonym)
+                ret += sayByExp((blocksLeft - 1) * 3, plural=int(thousandBlock) > 1, **kwargs)
             if byLine:
                 ret += os.linesep
         finally:
