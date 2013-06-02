@@ -50,8 +50,15 @@ COMBINE_EXCEPTIONS = {
     'trezenti': ['tres', 'zenti']
 }
 
+# These are valid synonyms, that can be used.
+LATIN_SYNONYMS = {
+    16: ['sex', 'dezi'],
+    19: ['novem', 'dezi'],
+    5: ['quinqui', ]
+}
 
-def _sayLatin(number, delimiter=''):
+
+def _sayLatin(number, delimiter='', synonym=False):
     """
     Build the latin word for given number.
     @param number int from 1 to 999.
@@ -64,38 +71,43 @@ def _sayLatin(number, delimiter=''):
         raise ValueError("Delimiter must not be a-z.")
     logger.debug("say latin: %s", number)
 
+    if synonym and number in LATIN_SYNONYMS:
+        return delimiter.join(LATIN_SYNONYMS[number])
+
     one = number % 10
     ten = (number - one) % 100
     hundred = number - ten - one
-    oneIndex, tenIndex, hundredIndex = one - 1, ten / 10 - 1, hundred / 100 - 1
 
-    combineHundredIfNeeded = lambda ret: ret + delimiter + LATIN_PREFIXES[HUNDREDS][hundredIndex][0] if hundred else ret
+    hundredPrefix = LATIN_PREFIXES[HUNDREDS][hundred / 100 - 1] if hundred else None
+    tenPrefix = LATIN_PREFIXES[TENS][ten / 10 - 1] if ten else None
+
+    combineHundredIfNeeded = lambda ret: ret + delimiter + hundredPrefix[0] if hundred else ret
 
     if ten == 0 and hundred == 0:
-        return LATIN_PREFIXES[ALONE_ONES][oneIndex]
+        return LATIN_PREFIXES[ALONE_ONES][one - 1]
     if one == 0:
         if ten == 0:
-            return LATIN_PREFIXES[HUNDREDS][hundredIndex][0]
+            return hundredPrefix[0]
         else:
-            ret = LATIN_PREFIXES[TENS][tenIndex][0]
+            ret = tenPrefix[0]
             return combineHundredIfNeeded(ret)
 
-    onePrefix = LATIN_PREFIXES[COMBINE_ONES][oneIndex]
+    onePrefix = LATIN_PREFIXES[COMBINE_ONES][one - 1]
 
-    def combineOne(one, other):
+    def combineOne(other):
         """ Combine the one prefix, with a ten or hundred. """
-        additionalCharacter = set(one[1:]).intersection(other[1:])
-        ret = one[0] + (additionalCharacter.pop() if additionalCharacter else '') + delimiter + other[0]
+        additionalCharacter = set(onePrefix[1:]).intersection(other[1:])
+        ret = onePrefix[0] + (additionalCharacter.pop() if additionalCharacter else '') + delimiter + other[0]
         exception = COMBINE_EXCEPTIONS.get(ret.replace(delimiter, ''), None)
         return delimiter.join(exception) if exception else ret
 
     if ten == 0:
-        return combineOne(onePrefix, LATIN_PREFIXES[HUNDREDS][hundredIndex])
-    ret = combineOne(onePrefix, LATIN_PREFIXES[TENS][tenIndex])
+        return combineOne(hundredPrefix)
+    ret = combineOne(tenPrefix)
     return combineHundredIfNeeded(ret)
 
 
-def _sayLongScale(zeros, plural=False, delimiter=''):
+def _sayLongScale(zeros, plural=False, delimiter='', synonym=False):
     """
     Build the word for the number, starting with a 1, followed by as many 0 as specified in zeros.
     @param zeros the number of "0"s, following the "1". Must be 6 at least and zeros mod 3 == 0.
@@ -116,13 +128,13 @@ def _sayLongScale(zeros, plural=False, delimiter=''):
             prefix = "ni" + delimiter
             logger.debug("say latin: 000")
         else:
-            prefix = _sayLatin(current, delimiter)
+            prefix = _sayLatin(current, delimiter, synonym)
             # If we combine a ten prefix, without a hundred prefix, the 'a' changes to 'i' if present at last position.
             if 100 > current > 9 and prefix[-1] == "a":
                 prefix = prefix[:-1] + 'i'
             sixes -= current
             prefix += delimiter
-        # This is the prefix for separating the thousand blocks. We skip this, if this is the firs iteration.
+        # This is the prefix for separating the thousand blocks. We skip this, if this is the first iteration.
         if ret:
             prefix += "lli" + delimiter
         ret = prefix + ret
@@ -137,7 +149,7 @@ def _sayLongScale(zeros, plural=False, delimiter=''):
     return ret + pluralPostfix if plural else ret
 
 
-def _sayShortScale(zeros, plural=False, delimiter=''):
+def _sayShortScale(zeros, plural=False, delimiter='', synonym=False):
     """
     Build the word for the number, starting with a 1, followed by as many 0 as specified in zeros.
     @param zeros the number of "0"s, following the "1". Must be 6 at least and zeros mod 3 == 0.
@@ -149,12 +161,12 @@ def _sayShortScale(zeros, plural=False, delimiter=''):
     if zeros % 3 > 0:
         raise ValueError("Zeros mod 3 must be 0.")
     longScaleZeros = 2 * zeros - 6
-    ret = _sayLongScale(longScaleZeros, plural=False, delimiter=delimiter).replace('z', 'c')
+    ret = _sayLongScale(longScaleZeros, plural=False, delimiter=delimiter, synonym=synonym).replace('z', 'c')
 
     return ret + "s" if plural else ret
 
 
-def sayByExp(zeros, plural=False, delimiter='', shortScale=False):
+def sayByExp(zeros, plural=False, delimiter='', shortScale=False, synonym=False):
     """
     Build the word for the number, starting with a 1, followed by as many "0" as specified in zeros.
     @param zeros the number of "0", following the "1". Must be 3 at least and zeros % 3 == 0.
@@ -172,9 +184,9 @@ def sayByExp(zeros, plural=False, delimiter='', shortScale=False):
         else:
             ret = "tausend"
     elif shortScale:
-        ret = _sayShortScale(zeros, plural, delimiter)
+        ret = _sayShortScale(zeros, plural, delimiter, synonym)
     else:
-        ret = _sayLongScale(zeros, plural, delimiter)
+        ret = _sayLongScale(zeros, plural, delimiter, synonym)
     return ret
 
 
@@ -232,7 +244,7 @@ def _splitThousandBlocks(number):
     return ret
 
 
-def say(number, byLine=False, latinOnly=False, delimiter='', shortScale=False):
+def say(number, byLine=False, latinOnly=False, delimiter='', shortScale=False, synonym=False):
     """
     Build the  world for given number.
     @param number The number to build (can be a string or int).
@@ -261,7 +273,7 @@ def say(number, byLine=False, latinOnly=False, delimiter='', shortScale=False):
             else:
                 ret += _sayGerman(thousandBlock, blocksLeft) + (delimiter if blocksLeft > 1 else '')
             if blocksLeft > 1:
-                ret += sayByExp((blocksLeft - 1) * 3, plural=int(thousandBlock) > 1, delimiter=delimiter, shortScale=shortScale)
+                ret += sayByExp((blocksLeft - 1) * 3, plural=int(thousandBlock) > 1, delimiter=delimiter, shortScale=shortScale, synonym=synonym)
             if byLine:
                 ret += os.linesep
         finally:

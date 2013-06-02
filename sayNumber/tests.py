@@ -225,6 +225,17 @@ class TestLatin(unittest.TestCase):
     def testOther(self):
         self.assertEqual('dezizenti', _sayLatin(110))
 
+    def testSynonyms(self):
+        self.assertEqual('sedezi', _sayLatin(16))
+        self.assertEqual('sexdezi', _sayLatin(16, synonym=True))
+        self.assertEqual('sex-dezi', _sayLatin(16, delimiter='-', synonym=True))
+
+        self.assertEqual('novendezi', _sayLatin(19))
+        self.assertEqual('novemdezi', _sayLatin(19, synonym=True))
+
+        self.assertEqual('quinti', _sayLatin(5))
+        self.assertEqual('quinqui', _sayLatin(5, synonym=True))
+
 
 class LongScaleTest(unittest.TestCase):
     def test6000(self):
