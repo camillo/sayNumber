@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: iso-8859-1 -*-
 
 COPYRIGHT = "Copyright (C) 2013 Daniel Marohn - daniel.marohn@gmail.com"
 # This program is free software; find details in file LICENCE or here:
@@ -29,7 +28,7 @@ class MessageAction(argparse._HelpAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
         try:
-            parser.exit(message=self.message().decode('latin-1'))
+            parser.exit(message=self.message())
         except Exception as ex:
             parser.error(ex.message)
 
@@ -43,62 +42,56 @@ class ExampleAction(MessageAction):
     def message(self):
         return """
 say.py --zeros 9
-milliarde
+milliard
 
 say.py --zeros --shortScale 9
 billion
 
-say.py 123
-einhundertdreiundzwanzig
-
 say.py 9999999345349583045894
-neuntrilliardenneunhundertneunundneunzigtrillionenneunhundertneunundneunzigbilliardendreihundertfünfundvierzigbillionendreihundertneunundvierzigmilliardenfünfhundertdreiundachtzigmillionenfünfundvierzigtausendachthundertvierundneunzig
+9 trilliards 999 trillions 999 billiards 345 billions 349 milliards 583 millions 45 thousand 894
 
 say.py --zeros 123
-vigintilliarde
+vigintilliard
 
 say.py --zeros 1000000
-10 sesexagintazentillisesexagintaseszentilliarden
+10 sesexagintazentillisesexagintaseszentilliard
 
 say.py --zeros 9999999345349583045894
-100 millisesexagintaseszentillisesexagintaseszentilliseptenquinquagintaquingentillioktoquinquagintaquingentillitresexagintaduzentilliquadragintaoktingentilliduooktogintanongentillionen
+100 millisesexagintaseszentillisesexagintaseszentilliseptenquinquagintaquingentillioktoquinquagintaquingentillitresexagintaduzentilliquadragintaoktingentilliduooktogintanongentillions
 
 say.py -z 9290823849028419271209381902381 --delimiter
-100 mi-lli-okto-quadraginta-quingenti-lli-septuagintaquadringenti-lli-un-quadraginta-seszenti-lli-quattuor-quingenti-lli-ses-triginta-septingenti-lli-quinqua-quadraginta-quingenti-lli-un-duzenti-lli-tre-sexaginta-quingenti-lli-quinquagintaseszenti-lli-se-nonaginta-trezenti-lliarden
+100 mi-lli-okto-quadraginta-quingenti-lli-septuagintaquadringenti-lli-un-quadraginta-seszenti-lli-quattuor-quingenti-lli-ses-triginta-septingenti-lli-quinqua-quadraginta-quingenti-lli-un-duzenti-lli-tre-sexaginta-quingenti-lli-quinquagintaseszenti-lli-se-nonaginta-trezenti-lliards
 
 say.py --random 123
-siebenhundertvierundsechzigvigintillioneneinhundertvierzignovendezilliardene ... izigtausenddreihundertvierzehn
+439 vigintillions 599 novendezilliards 471 novendezillions 917 oktodezilliards 730 oktodezillions 882 septendezilliards ...
 
-say.py --random --latinOnly 123
-398 vigintillionen 249 novendezilliarden 87 novendezillionen 534 oktodezilliarden 809 oktodezillionen ...
-
-say.py --random --latinOnly --byLine 123
-923 vigintillionen
-910 novendezilliarden
+say.py --random --byLine 123
+923 vigintillions
+910 novendezilliards
 ...
 
-say.py --random --latinOnly --numeric 123
+say.py --random --numeric 123
 217764231953087899423934113226947903488766240424414874685303342506908446655767312941208736464299524772777802411207853347868
-217 vigintillionen 764 novendezilliarden 231 novendezillionen 953 oktodezilliarden 87 oktodezillionen ...
+217 vigintillions 764 novendezilliards 231 novendezillions 953 oktodezilliards 87 oktodezillions ...
 
 say.py --random --latinOnly --numeric --grouping 123
 695.128.681.352.561.722.639.169 ...
-695 vigintillionen 128 novendezilliarden  ...
+695 vigintillions 128 novendezilliards  ...
 
 say.py --googol --numeric --grouping
 10.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000.000
-zehnsedezilliarden
+10 sedezilliards
 
 say.py --googolplex
-10 millisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentilliarden
+10 millisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentillisesexagintaseszentilliards
 
 say.py --locale german -n 100000000000 -f -g
 100.000.000.000
-einhundertmilliarden
+100 milliards
 
 say.py --locale uk -n 100000000000 -f -g
 100,000,000,000
-einhundertmilliarden
+100 milliards
 """
 
 
@@ -257,15 +250,13 @@ def main(args):
         args.number = numeric
         ret = say(**args.__dict__)
     else:
+        args.number = number
         ret = say(**args.__dict__)
         numeric = number
     if args.numeric:
         print locale.format("%d", int(numeric), grouping=args.grouping)
     if not args.numericOnly:
-        if args.noUmlaut:
-            print ret.replace("ö", "oe").replace("ü", "ue")
-        else:
-            print ret.decode('latin-1')
+        print ret
 
 
 def createParser():
@@ -309,7 +300,7 @@ def createParser():
 
     group = parser.add_argument_group('optional arguments')
     group.add_argument('-s', '--shortScale', dest='shortScale', action=ShortScaleAction,
-                       help="use american style: 1 000 000 000 is 1 billion; 1 milliarde if not set - implicit using -l")
+                       help="use american style: 1 000 000 000 is 1 billion; 1 milliard if not set - implicit using -l")
     group.add_argument('-ch', '--chuquet', dest='chuquet', action='store_true',
                        help='use old latin prefixes like duodeviginti for oktodezi')
     group.add_argument('-n', '--numeric', dest='numeric', action='store_true',
@@ -321,14 +312,10 @@ def createParser():
                             help='say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion')
     group.add_argument('-f', '--force', dest='force', action='store_true',
                        help="ignore size warnings")
-    group.add_argument('-u', '--noUmlaut', dest='noUmlaut', action='store_true',
-                       help="use ue and oe instead of german umlaut; this might become handy, if you cannot change your terminal's encoding")
 
     group = parser.add_argument_group('format')
     group.add_argument('-b', '--byLine', dest='byLine', action='store_true',
                        help='write components line by line')
-    group.add_argument('-l', '--latinOnly', dest='latinOnly', action='store_true',
-                       help='say "123 millionen" instead of "einhundertdreiundzwanzigmillionen"')
     group.add_argument('-g', '--grouping', dest='grouping', action=GroupingAction,
                        help="group thousand blocks; implicit using -n")
     group.add_argument('-d', '--delimiter', nargs="?", const='-', dest='delimiter', default='', type=validDelimiter,

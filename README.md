@@ -58,9 +58,9 @@ Some examples:
 | 15 | quadrillion | 4 | billiard | 2 |
 | 18 | quintillion | 5 | trillion | 3 |
 | 21 | sextillion | 6 | trilliard | 3 |
-| 99 | duotrigintillion | 32 | sedezilliarde | 16 |
+| 99 | duotrigintillion | 32 | sedezilliard | 16 |
 | 300 | novenonagintillion | 99 | quinquagintillion | 50 |
-| 1011 | sestrigintatrecentillion | 336 | oktosexagintazentilliarde | 168 |
+| 1011 | sestrigintatrecentillion | 336 | oktosexagintazentilliard | 168 |
 | 3000 | novenonagintanongentillion | 999 | quingentillion | 500 |
 
 
@@ -76,8 +76,8 @@ Some more advanced examples (the `-` delimiter are not part of the 'real' name):
 
 | Zeros | Short scale(us) |  Latin number | Long scale (eu) |  Latin number |
 | ------------- |:-------------:| :-------------:|:-------------:|:-------------:|
-| 100011 | trestriginti-lli-sestrigintatrecenti-llion | 33 336 | sedezi-lli-oktosexagintaseszenti-lliarde | 16 668 |
-| 987654321 | novemvigintitrecenti-lli-oktodeciducenti-lli-sexcenti-llion | 329 218 106 | quattuorsexagintazenti-lli-novenseszenti-lli-tresquinquaginti-lliarde | 164 609 53 |
+| 100011 | trestriginti-lli-sestrigintatrecenti-llion | 33 336 | sedezi-lli-oktosexagintaseszenti-lliard | 16 668 |
+| 987654321 | novemvigintitrecenti-lli-oktodeciducenti-lli-sexcenti-llion | 329 218 106 | quattuorsexagintazenti-lli-novenseszenti-lli-tresquinquaginti-lliard | 164 609 53 |
 
 
 ## Usage
@@ -88,8 +88,8 @@ arguments. Simplest call: ./say.py 94283203948239048209482409283490...2840923432
 
 <pre>
 usage: say.py [-T] [-A] [-H] [-E] [-S] [-M] [-U] [-G] [-GG] [-GGG] [-h] [-e]
-              [-SL] [-v] [-c] [-C] [-s] [-ch] [-n] [-N | -sy] [-f] [-u] [-b]
-              [-l] [-g] [-d [DELIMITER]] [-L LOCALE] [-z | -r]
+              [-SL] [-v] [-c] [-C] [-s] [-ch] [-n] [-N | -sy] [-f] [-b] [-g]
+              [-d [DELIMITER]] [-L LOCALE] [-z | -r]
               [number]
 
 Write names of (very) big numbers.
@@ -117,17 +117,15 @@ help:
   -C, --fullLicence     show licence file and exit; tries to download and save licence, if not available
 
 optional arguments:
-  -s, --shortScale      use american style: 1 000 000 000 is 1 billion; 1 milliarde if not set - implicit using -l
+  -s, --shortScale      use american style: 1 000 000 000 is 1 billion; 1 milliard if not set - implicit using -l
   -ch, --chuquet        use old latin prefixes like duodeviginti for oktodezi
   -n, --numeric         say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits
   -N, --numericOnly     say the number only in numeric form
   -sy, --synonym        say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion
   -f, --force           ignore size warnings
-  -u, --noUmlaut        use ue and oe instead of german umlaut; this might become handy, if you cannot change your terminal's encoding
 
 format:
   -b, --byLine          write components line by line
-  -l, --latinOnly       say "123 millionen" instead of "einhundertdreiundzwanzigmillionen"
   -g, --grouping        group thousand blocks; implicit using -n
   -d [DELIMITER], --delimiter [DELIMITER]
                         separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the numbers get build

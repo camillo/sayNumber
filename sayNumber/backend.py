@@ -1,5 +1,3 @@
-# -*- coding: iso-8859-1 -*-
-
 # Copyright (C) 2013 Daniel Marohn - daniel.marohn@gmail.com
 # This program is free software; find details in file LICENCE or here:
 # https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
@@ -9,21 +7,6 @@ import string
 import logging
 
 logger = logging.getLogger(__name__)
-
-# German has a lot of exceptions during the first 20 numbers, so easiest thing is
-# to collect them in a dict, instead of writing special code.
-GERMAN_SMALL_NUMBERS = {
-    '0': 'null',      '1': 'eins',       '2': 'zwei',       '3': 'drei',      '4': 'vier',
-    '5': 'fünf',      '6': 'sechs',      '7': 'sieben',     '8': 'acht',      '9': 'neun',
-    '10': 'zehn',     '11': 'elf',       '12': 'zwölf',     '13': 'dreizehn', '14': 'vierzehn',
-    '15': 'fünfzehn', '16': 'sechszehn', '17': 'siebzehn',  '18': 'achtzehn', '19': 'neunzehn'}
-
-# These are exceptions, building german 2 digit numbers like 72.
-GERMAN_DEZI_EXCEPTIONS = {
-    '2': 'zwan',
-    '6': 'sech',
-    '7': 'sieb'
-}
 
 # These are the prefixes to build latin numbers.
 LATIN_PREFIXES = [
@@ -156,12 +139,10 @@ def _sayLongScale(zerosAfterOne, plural=False, delimiter='', **kwargs):
         sixes /= 1000
     # Now add the postfix to make a word.
     if lliarde:
-        ret += "lliarde"
-        pluralPostfix = "n"
+        ret += "lliard"
     else:
         ret += "llion"
-        pluralPostfix = "en"
-    return ret + pluralPostfix if plural else ret
+    return ret + 's' if plural else ret
 
 
 def _sayShortScale(zeros, plural=False, **kwargs):
@@ -176,9 +157,7 @@ def _sayShortScale(zeros, plural=False, **kwargs):
     if zeros % 3 > 0:
         raise ValueError("Zeros mod 3 must be 0.")
     longScaleZeros = 2 * zeros - 6
-    ret = _sayLongScale(longScaleZeros, plural=False, **kwargs).replace("z", "c")
-
-    return ret + "s" if plural else ret
+    return _sayLongScale(longScaleZeros, plural=plural, **kwargs).replace("z", "c")
 
 
 def sayByExp(zerosAfterOne, plural=False, shortScale=False, **kwargs):
@@ -194,51 +173,11 @@ def sayByExp(zerosAfterOne, plural=False, shortScale=False, **kwargs):
     if zerosAfterOne % 3 > 0:
         raise ValueError("Zeros mod 3 must be 0.")
     if zerosAfterOne == 3:
-        if shortScale:
-            ret = "thousand"
-        else:
-            ret = "tausend"
+        ret = "thousand"
     elif shortScale:
         ret = _sayShortScale(zerosAfterOne, plural, **kwargs)
     else:
         ret = _sayLongScale(zerosAfterOne, plural, **kwargs)
-    return ret
-
-
-def _sayGermanShortNumber(shortNumber, sayEin):
-    """
-    Helper to say a short number, that is used before another part (neunzehn millionen or eine million or ein tausend)
-    @param sayEin True to say ein, instead of eine in case of shortNmuber == 1
-    """
-    if shortNumber == "1":
-        return "ein" if sayEin else "eine"
-    return GERMAN_SMALL_NUMBERS[shortNumber]
-
-
-def _sayGerman(number, componentsLeft):
-    """
-    Helper to build the german word for given number.
-    @param number Must be 0-999.
-    """
-    if not 0 <= int(number) <= 999:
-        raise ValueError("Number must be 0-999")
-    number = str(number)
-    if number in GERMAN_SMALL_NUMBERS:
-        return _sayGermanShortNumber(number, componentsLeft == 2)
-    currentLen = len(number)
-    ret = ""
-    if currentLen == 3:
-        if not number[0] == "0":
-            ret = _sayGermanShortNumber(number[0], sayEin=True) + "hundert"
-        return ret + _sayGerman(number[1:], componentsLeft)
-
-    if number[0] == "0":
-        if number[1] == "0":
-            return ""
-        return GERMAN_SMALL_NUMBERS[number[1]]
-    if not number[1] == "0":
-        ret = _sayGermanShortNumber(number[1], sayEin=True) + "und"
-    ret += GERMAN_DEZI_EXCEPTIONS.get(number[0], GERMAN_SMALL_NUMBERS[number[0]]) + "zig"
     return ret
 
 
@@ -269,8 +208,8 @@ def say(number, byLine=False, latinOnly=False, delimiter='', shortScale=False, s
     @return the word for given number.
     """
     number = str(number)
-    if number in GERMAN_SMALL_NUMBERS:
-        return GERMAN_SMALL_NUMBERS[number]
+    if number < 1000:
+        return number
     blocks = _splitThousandBlocks(number)
     blocksLeft = len(blocks)
     ret = ""
@@ -279,14 +218,11 @@ def say(number, byLine=False, latinOnly=False, delimiter='', shortScale=False, s
         try:
             if thousandBlock == "000":
                 continue
-            if latinOnly:
-                if not byLine and not isFirstComponent:
-                    ret += " "
-                ret += str(int(thousandBlock))
-                if blocksLeft > 1:
-                    ret += " "
-            else:
-                ret += _sayGerman(thousandBlock, blocksLeft) + (delimiter if blocksLeft > 1 else '')
+            if not byLine and not isFirstComponent:
+                ret += " "
+            ret += str(int(thousandBlock))
+            if blocksLeft > 1:
+                ret += " "
             if blocksLeft > 1:
                 ret += sayByExp((blocksLeft - 1) * 3, plural=int(thousandBlock) > 1, delimiter=delimiter, shortScale=shortScale, synonym=synonym)
             if byLine:
