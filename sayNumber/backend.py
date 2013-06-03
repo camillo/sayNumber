@@ -29,12 +29,12 @@ def _sayLongScale(zerosAfterOne, plural=False, delimiter='', **kwargs):
         # If we combine a ten prefix, without a hundred prefix, the 'a' changes to 'i' if present at last position.
         if 100 > current > 9 and prefix[-1] == "a":
             prefix = prefix[:-1] + 'i'
-        sixes -= current
         prefix += delimiter
         # This is the prefix for separating the thousand blocks. We skip this, if this is the first iteration.
         if ret:
             prefix += "lli" + delimiter
         ret = prefix + ret
+        sixes -= current
         sixes /= 1000
     # Now add the postfix to make a word.
     if lliarde:
@@ -99,7 +99,7 @@ def _splitThousandBlocks(number):
     return ret
 
 
-def say(number, byLine=False, **kwargs):
+def say(number, byLine=False, forceSingular=False, forcePlural=False, **kwargs):
     """
     Build the  world for given number.
     @param number The number to build (can be a string or int).
@@ -114,16 +114,18 @@ def say(number, byLine=False, **kwargs):
     ret = ""
     isFirstComponent = True
     for thousandBlock in blocks:
+        thousandValue = int(thousandBlock)
         try:
             if thousandBlock == "000":
                 continue
             if not byLine and not isFirstComponent:
                 ret += " "
-            ret += str(int(thousandBlock))
+            ret += str(thousandValue)
             if blocksLeft > 1:
                 ret += " "
             if blocksLeft > 1:
-                ret += sayByExp((blocksLeft - 1) * 3, plural=int(thousandBlock) > 1, **kwargs)
+                plural = forcePlural or (thousandValue > 1 and not forceSingular)
+                ret += sayByExp((blocksLeft - 1) * 3, plural=plural, **kwargs)
             if byLine:
                 ret += os.linesep
         finally:

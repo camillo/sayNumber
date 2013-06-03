@@ -2,7 +2,7 @@
 # https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
 
 import string
-from logging import getLogger, DEBUG
+from logging import getLogger, INFO
 from latinNumbers import LATIN_NUMBERS, LATIN_SYNONYMS, CHUQUET_PREFIXES
 
 logger = getLogger(__name__)
@@ -13,13 +13,16 @@ def sayLatin(numberToSay, delimiter='', synonym=False, chuquet=False, **_):
         raise ValueError("Number must be 0-999; given: [%s]." % numberToSay)
 
     if chuquet and numberToSay in CHUQUET_PREFIXES:
+        logger.debug("using chuquet prefix")
         target = CHUQUET_PREFIXES[numberToSay]
     elif synonym and numberToSay in LATIN_SYNONYMS:
+        logger.debug("using synonym")
         target = LATIN_SYNONYMS[numberToSay]
     else:
+        logger.debug("using normal latin prefix")
         target = LATIN_NUMBERS[numberToSay]
-    if logger.isEnabledFor(DEBUG):
-        logger.debug("%s -> %s", numberToSay, "-".join(target))
+    if logger.isEnabledFor(INFO):
+        logger.info("%s -> %s", numberToSay, "-".join(target))
     return delimiter.join(target)
 
 
@@ -100,35 +103,46 @@ def _sayLatin(numberToSay, delimiter=''):
 
 
 if __name__ == "__main__":
-    # If you start this script (python latin.py), the dict in latinNumbers.py get generated. We do this precalculation
+    # If you start this script (python latin.py), the dicts in latinNumbers.py get generated. We do this precalculation
     # to save time, building REALLY(!) big numbers.
 
     ret = """# Copyright (C) 2013 Daniel Marohn - daniel.marohn@gmail.com
 # This program is free software; find details in file LICENCE or here:
 # https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
 
-# This file is auto generated, by running python latin.py
+# This file is auto generated, running python latin.py.
+# Changes to this file will be overridden without warning, when running latin.py again (will not happen automatically).
 
 # These are valid synonyms, that can be used.
 LATIN_SYNONYMS = {
+    5: ['quinqui', ],
     16: ['sex', 'dezi'],
     19: ['novem', 'dezi'],
-    5: ['quinqui', ]
 }
 
-# This are the latin prefixes, using old latin numbers as invented by Nicolas Chuquet
+# This are the prefixes, using old latin numbers as invented by Nicolas Chuquet
 CHUQUET_PREFIXES = {
-    18: ['duo', 'de', 'viginti'],      59: ['un', 'de', 'sexaginta'],
-    19: ['un', 'de', 'viginti'],       68: ['duo', 'de', 'septuaginta'],
-    28: ['duo', 'de', 'triginta'],     69: ['un', 'de', 'septuaginta'],
-    29: ['un', 'de', 'triginta'],      78: ['duo', 'de', 'octoginta'],
-    38: ['duo', 'de', 'quadraginta'],  79: ['un', 'de', 'octoginta'],
-    39: ['un', 'de', 'quadraginta'],   88: ['duo', 'de', 'nonaginta'],
-    48: ['duo', 'de', 'quinquaginta'], 89: ['un', 'de', 'nonaginta'],
-    49: ['un', 'de', 'quinquaginta'],  98: ['duo', 'de', 'centi'],
-    58: ['duo', 'de', 'sexaginta'],    99: ['un', 'de', 'centi'],
+    18: ['duo', 'de', 'viginti'],
+    19: ['un', 'de', 'viginti'],
+    28: ['duo', 'de', 'triginta'],
+    29: ['un', 'de', 'triginta'],
+    38: ['duo', 'de', 'quadraginta'],
+    39: ['un', 'de', 'quadraginta'],
+    48: ['duo', 'de', 'quinquaginta'],
+    49: ['un', 'de', 'quinquaginta'],
+    58: ['duo', 'de', 'sexaginta'],
+    59: ['un', 'de', 'sexaginta'],
+    68: ['duo', 'de', 'septuaginta'],
+    69: ['un', 'de', 'septuaginta'],
+    78: ['duo', 'de', 'octoginta'],
+    79: ['un', 'de', 'octoginta'],
+    88: ['duo', 'de', 'nonaginta'],
+    89: ['un', 'de', 'nonaginta'],
+    98: ['duo', 'de', 'centi'],
+    99: ['un', 'de', 'centi'],
 }
 
+# This are the combined prefixes to use for numbers 1 to 999; plus the standalone prefix 'ni' for 000
 """
     ret += "LATIN_NUMBERS = {\r"
     ret += "    0: ['ni'],\r"

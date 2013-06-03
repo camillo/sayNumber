@@ -229,7 +229,7 @@ def main(args):
         # Do not say given number, but the number with that many zeros.
         zeros, zerosLeft = divmod(number, 3)
         zeros *= 3
-        ret = ("10" if zerosLeft == 1 else "100") + " " if zerosLeft else ""
+        ret = "1" + "0" * zerosLeft + " "
         ret += sayByExp(zeros, zerosLeft, **args.__dict__)
         numeric = "1" + "0" * number if args.numeric else None
     elif args.random:
@@ -252,6 +252,7 @@ def main(args):
 
 
 def createParser():
+    from logging import INFO, DEBUG
     parser = argparse.ArgumentParser(description='Write names of (very) big numbers.',
                                      epilog="Please report bugs to daniel.marohn@gmail.com." + os.linesep +
                                             "Find more information here: http://de.wikipedia.org/wiki/Zahlennamen",
@@ -277,6 +278,52 @@ def createParser():
     group.add_argument('-GG', '--googolplex', action="store_true", help='say a googolplex (10^googol)')
     group.add_argument('-GGG', '--googolplexplex', action=GoogolplexplexAction, help='say a googolplexplex (10^googolplex)')
 
+    group = parser.add_argument_group('optional arguments')
+    group.add_argument('-s', '--shortScale', dest='shortScale', action=ShortScaleAction,
+                       help="use american style: 1 000 000 000 is 1 billion; 1 milliard if not set")
+    group.add_argument('-ch', '--chuquet', dest='chuquet', action='store_true',
+                       help='use old latin prefixes like duodeviginti instead of oktodezi')
+    group.add_argument('-n', '--numeric', dest='numeric', action='store_true',
+                       help="say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits")
+    innerGroup = group.add_mutually_exclusive_group()
+    innerGroup.add_argument('-N', '--numericOnly', dest='numericOnly', action=NumericOnlyAction,
+                            help="say the number only in numeric form")
+    innerGroup.add_argument('-sy', '--synonym', dest='synonym', action='store_true',
+                            help='say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion')
+    group.add_argument('-f', '--force', dest='force', action='store_true',
+                       help="ignore size warnings")
+    innerGroup = group.add_mutually_exclusive_group()
+    innerGroup.add_argument('-V', '--verbose', dest='verbose', action='store_const', const=INFO,
+                            help="output debug information; very useful to understand how words get build")
+    innerGroup.add_argument('-VV', '--Verbose', dest='verbose', action='store_const', const=DEBUG,
+                            help="output all debug information; only useful if you hack on the code")
+
+    group = parser.add_argument_group('output')
+    group.add_argument('-d', '--delimiter', nargs="?", const='-', dest='delimiter', default='',
+                       help="separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the words get build")
+    group.add_argument('-g', '--grouping', dest='grouping', action=GroupingAction,
+                       help="group thousand blocks; implicit using -n")
+    innerGroup = group.add_mutually_exclusive_group()
+    innerGroup.add_argument('-fz', '--forceZ', dest='forceZ', action='store_true',
+                            help="always use z, instead of c; per default we say duozentillion in long scale (default) and duocentillion in short scale")
+    innerGroup.add_argument('-fc', '--forceC', dest='forceC', action='store_true',
+                            help="always use c, instead of z")
+    innerGroup = group.add_mutually_exclusive_group()
+    innerGroup.add_argument('-fs', '--forceSingular', dest='forceSingular', action='store_true',
+                            help='always use singular forms: 5 million instead of 5 millions')
+    innerGroup.add_argument('-fp', '--forcePlural', dest='forcePlural', action='store_true',
+                            help='always use plural forms: 1 millions instead of 1 million')
+    group.add_argument('-b', '--byLine', dest='byLine', action='store_true',
+                       help='write components line by line')
+    group.add_argument('-L', '--locale', dest="locale", nargs=1, type=validLocale, default='',
+                       help='locale for formatting numbers; only useful with -g/--grouping (see -SL/--showLocales)')
+
+    group = parser.add_argument_group('make VERY big numbers').add_mutually_exclusive_group()
+    group.add_argument('-z', '--zeros', dest='zeros', action='store_true',
+                       help='do not say given number, but the number with that many zeros')
+    group.add_argument('-r', '--random', dest='random', action='store_true',
+                       help='do not say given number, but a random number with that many digits')
+
     group = parser.add_argument_group('help')
     group.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
                        help="show this help message and exit")
@@ -289,44 +336,6 @@ def createParser():
                        help="show licence information and exit")
     group.add_argument('-C', '--fullLicence', action=FullLicenceAction, default=argparse.SUPPRESS,
                        help="show licence file and exit; tries to download and save licence, if not available")
-
-    group = parser.add_argument_group('optional arguments')
-    group.add_argument('-s', '--shortScale', dest='shortScale', action=ShortScaleAction,
-                       help="use american style: 1 000 000 000 is 1 billion; 1 milliard if not set - implicit using -l")
-    group.add_argument('-ch', '--chuquet', dest='chuquet', action='store_true',
-                       help='use old latin prefixes like duodeviginti for oktodezi')
-    group.add_argument('-n', '--numeric', dest='numeric', action='store_true',
-                       help="say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits")
-    innerGroup = group.add_mutually_exclusive_group()
-    innerGroup.add_argument('-N', '--numericOnly', dest='numericOnly', action=NumericOnlyAction,
-                            help="say the number only in numeric form")
-    innerGroup.add_argument('-sy', '--synonym', dest='synonym', action='store_true',
-                            help='say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion')
-    innerGroup = group.add_mutually_exclusive_group()
-    innerGroup.add_argument('-fz', '--forceZ', dest='forceZ', action='store_true',
-                            help="always use z, instead of c; per default we say duozentillion in long scale (default) and duocentillion in short scale")
-    innerGroup.add_argument('-fc', '--forceC', dest='forceC', action='store_true',
-                            help="always use c, instead of z")
-    group.add_argument('-f', '--force', dest='force', action='store_true',
-                       help="ignore size warnings")
-    group.add_argument('-V', '--verbose', dest='verbose', action='store_true',
-                       help="output debug information; very useful to understand how words get build")
-
-    group = parser.add_argument_group('format')
-    group.add_argument('-b', '--byLine', dest='byLine', action='store_true',
-                       help='write components line by line')
-    group.add_argument('-g', '--grouping', dest='grouping', action=GroupingAction,
-                       help="group thousand blocks; implicit using -n")
-    group.add_argument('-d', '--delimiter', nargs="?", const='-', dest='delimiter', default='',
-                       help="separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the words get build")
-    group.add_argument('-L', '--locale', dest="locale", nargs=1, type=validLocale, default='',
-                       help='locale for formatting numbers; only useful with -g/--grouping (see -SL/--showLocales)')
-
-    group = parser.add_argument_group('number').add_mutually_exclusive_group()
-    group.add_argument('-z', '--zeros', dest='zeros', action='store_true',
-                       help='do not say given number, but the number with that many zeros')
-    group.add_argument('-r', '--random', dest='random', action='store_true',
-                       help='do not say given number, but a random number with that many digits')
 
     return parser
 
@@ -354,13 +363,9 @@ def parseCommandlineArguments():
     return args
 
 
-def configureLogging(verbose=False, **_):
-    from logging import basicConfig, DEBUG, ERROR
-    if verbose:
-        level = DEBUG
-    else:
-        level = ERROR
-    basicConfig(level=level)
+def configureLogging(verbose, **_):
+    from logging import basicConfig, ERROR
+    basicConfig(level=verbose or ERROR)
 
 
 if __name__ == "__main__":

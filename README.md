@@ -87,9 +87,10 @@ say.py does also show, how to use the lib. Public functions are `say` and `sayBy
 arguments. Simplest call: ./say.py 94283203948239048209482409283490...2840923432 (--shortScale, if you want the us/uk style)
 
 <pre>
-usage: say.py [-T] [-A] [-H] [-E] [-S] [-M] [-U] [-G] [-GG] [-GGG] [-h] [-e]
-              [-SL] [-v] [-c] [-C] [-s] [-ch] [-n] [-N | -sy] [-fz | -fc] [-f]
-              [-V] [-b] [-g] [-d [DELIMITER]] [-L LOCALE] [-z | -r]
+usage: say.py [-T] [-A] [-H] [-E] [-S] [-M] [-U] [-G] [-GG] [-GGG] [-s] [-ch]
+              [-n] [-N | -sy] [-f] [-V | -VV] [-d [DELIMITER]] [-g]
+              [-fz | -fc] [-fs | -fp] [-b] [-L LOCALE] [-z | -r] [-h] [-e]
+              [-SL] [-v] [-c] [-C]
               [number]
 
 Write names of (very) big numbers.
@@ -108,6 +109,32 @@ select one of these:
   -GGG, --googolplexplex
                         say a googolplexplex (10^googolplex)
 
+optional arguments:
+  -s, --shortScale      use american style: 1 000 000 000 is 1 billion; 1 milliard if not set
+  -ch, --chuquet        use old latin prefixes like duodeviginti instead of oktodezi
+  -n, --numeric         say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits
+  -N, --numericOnly     say the number only in numeric form
+  -sy, --synonym        say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion
+  -f, --force           ignore size warnings
+  -V, --verbose         output debug information; very useful to understand how words get build
+  -VV, --Verbose        output all debug information; only useful if you hack on the code
+
+output:
+  -d [DELIMITER], --delimiter [DELIMITER]
+                        separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the words get build
+  -g, --grouping        group thousand blocks; implicit using -n
+  -fz, --forceZ         always use z, instead of c; per default we say duozentillion in long scale (default) and duocentillion in short scale
+  -fc, --forceC         always use c, instead of z
+  -fs, --forceSingular  always use singular forms: 5 million instead of 5 millions
+  -fp, --forcePlural    always use plural forms: 1 millions instead of 1 million
+  -b, --byLine          write components line by line
+  -L LOCALE, --locale LOCALE
+                        locale for formatting numbers; only useful with -g/--grouping (see -SL/--showLocales)
+
+make VERY big numbers:
+  -z, --zeros           do not say given number, but the number with that many zeros
+  -r, --random          do not say given number, but a random number with that many digits
+
 help:
   -h, --help            show this help message and exit
   -e, --example         show examples and exit
@@ -115,29 +142,6 @@ help:
   -v, --version         show program's version number and exit
   -c, --licence         show licence information and exit
   -C, --fullLicence     show licence file and exit; tries to download and save licence, if not available
-
-optional arguments:
-  -s, --shortScale      use american style: 1 000 000 000 is 1 billion; 1 milliard if not set - implicit using -l
-  -ch, --chuquet        use old latin prefixes like duodeviginti for oktodezi
-  -n, --numeric         say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits
-  -N, --numericOnly     say the number only in numeric form
-  -sy, --synonym        say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion
-  -fz, --forceZ         always use z, instead of c; per default we say duozentillion in long scale and duocentillion in long scale (default)
-  -fc, --forceC         always use c, instead of z
-  -f, --force           ignore size warnings
-  -V, --verbose         output debug information; very useful to understand how words get build
-
-format:
-  -b, --byLine          write components line by line
-  -g, --grouping        group thousand blocks; implicit using -n
-  -d [DELIMITER], --delimiter [DELIMITER]
-                        separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the words get build
-  -L LOCALE, --locale LOCALE
-                        locale for formatting numbers; only useful with -g/--grouping (see -SL/--showLocales)
-
-number:
-  -z, --zeros           do not say given number, but the number with that many zeros
-  -r, --random          do not say given number, but a random number with that many digits
 </pre>
 
 
