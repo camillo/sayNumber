@@ -179,11 +179,11 @@ class GroupingAction(argparse._StoreTrueAction):
         args.numeric = True
 
 
-class ShortScaleAction(argparse._StoreTrueAction):
-    """ Add latinOnly argument if short scale is used """
+class BothScalesAction(argparse._StoreTrueAction):
+    """ Add shortScale argument, if bothScales is used """
     def __call__(self, parser, args, values, option=None):
         args.shortScale = True
-        args.latinOnly = True
+        args.bothScales = True
 
 
 class NumericOnlyAction(argparse._StoreTrueAction):
@@ -204,6 +204,14 @@ def atLeastZero(value):
         raise argparse.ArgumentTypeError("not a number: '%s'" % value)
 
 
+def atLeastOne(value):
+    """ Check that value is numeric and > 0 """
+    ret = atLeastZero(value)
+    if ret < 1:
+        raise argparse.ArgumentTypeError("Value must be 1 or greater.")
+    return ret
+
+
 def validLocale(value):
     """ Check that value is a valid locale or alias and resolves the alias if needed. """
     if value and not value in locale.locale_alias:
@@ -218,19 +226,25 @@ def validLocale(value):
     return value
 
 
-def main(args):
+def main(args, looping=True):
+    if args.bothScales and args.shortScale:
+        args.shortScale = False
+        main(args, False)
+        args.shortScale = True
     from backend import say, sayByExp
     number = args.number
     if args.googol or args.googolplex:
         number = NAMED_NUMBERS['googol']
     elif args.namedNumber:
         number = args.namedNumber
+    args.number = number
     if args.zeros or args.googolplex:
         # Do not say given number, but the number with that many zeros.
         zeros, zerosLeft = divmod(number, 3)
         zeros *= 3
         ret = "1" + "0" * zerosLeft + " "
         ret += sayByExp(zeros, zerosLeft, **args.__dict__)
+
         numeric = "1" + "0" * number if args.numeric else None
     elif args.random:
         # Do not say given number, but a random number with that many digits.
@@ -249,6 +263,16 @@ def main(args):
         print locale.format("%d", int(numeric), grouping=args.grouping)
     if not args.numericOnly:
         print ret
+    if args.loop and looping:
+        count, step = args.loop
+        args.googol, args.googolplex, args.namedNumber = None, None, None
+
+        while count > 1:
+            if not args.noNewLine:
+                print
+            args.number += step
+            count -= 1
+            main(args, False)
 
 
 def createParser():
@@ -279,8 +303,10 @@ def createParser():
     group.add_argument('-GGG', '--googolplexplex', action=GoogolplexplexAction, help='say a googolplexplex (10^googolplex)')
 
     group = parser.add_argument_group('optional arguments')
-    group.add_argument('-s', '--shortScale', dest='shortScale', action=ShortScaleAction,
-                       help="use american style: 1 000 000 000 is 1 billion; 1 milliard if not set")
+    group.add_argument('-s', '--shortScale', dest='shortScale', action="store_true",
+                       help='use american style: 1 000 000 000 is 1 billion; 1 milliard if not set')
+    group.add_argument('-b', '--bothScales', dest='bothScales', action=BothScalesAction,
+                       help='say both scale types; first long scale, then short scale')
     group.add_argument('-ch', '--chuquet', dest='chuquet', action='store_true',
                        help='use old latin prefixes like duodeviginti instead of oktodezi')
     group.add_argument('-n', '--numeric', dest='numeric', action='store_true',
@@ -290,7 +316,7 @@ def createParser():
                             help="say the number only in numeric form")
     innerGroup.add_argument('-sy', '--synonym', dest='synonym', action='store_true',
                             help='say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion')
-    group.add_argument('-f', '--force', dest='force', action='store_true',
+    group.add_argument('-F', '--force', dest='force', action='store_true',
                        help="ignore size warnings")
     innerGroup = group.add_mutually_exclusive_group()
     innerGroup.add_argument('-V', '--verbose', dest='verbose', action='store_const', const=INFO,
@@ -313,16 +339,21 @@ def createParser():
                             help='always use singular forms: 5 million instead of 5 millions')
     innerGroup.add_argument('-fp', '--forcePlural', dest='forcePlural', action='store_true',
                             help='always use plural forms: 1 millions instead of 1 million')
-    group.add_argument('-b', '--byLine', dest='byLine', action='store_true',
+    group.add_argument('-l', '--byLine', dest='byLine', action='store_true',
                        help='write components line by line')
+    group.add_argument('-nn', '--noNewLine', dest='noNewLine', action='store_true',
+                       help='do not print \\n between for loops; only useful with -f/--for')
     group.add_argument('-L', '--locale', dest="locale", nargs=1, type=validLocale, default='',
                        help='locale for formatting numbers; only useful with -g/--grouping (see -SL/--showLocales)')
 
-    group = parser.add_argument_group('make VERY big numbers').add_mutually_exclusive_group()
-    group.add_argument('-z', '--zeros', dest='zeros', action='store_true',
-                       help='do not say given number, but the number with that many zeros')
-    group.add_argument('-r', '--random', dest='random', action='store_true',
-                       help='do not say given number, but a random number with that many digits')
+    group = parser.add_argument_group('make VERY big numbers')
+    innerGroup = group.add_mutually_exclusive_group()
+    innerGroup.add_argument('-z', '--zeros', dest='zeros', action='store_true',
+                            help='do not say given number, but the number with that many zeros')
+    innerGroup.add_argument('-r', '--random', dest='random', action='store_true',
+                            help='do not say given number, but a random number with that many digits')
+    group.add_argument('-f', '--for', nargs=2, dest='loop', type=atLeastOne, metavar=('count', 'step'),
+                       help='say <count> numbers; start with <number>, add <step> each iteration; can be combined with -z/--zeros, but not with -r/--random')
 
     group = parser.add_argument_group('help')
     group.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
@@ -347,25 +378,44 @@ def parseCommandlineArguments():
     number = args.number
     if args.namedNumber:
         number = args.namedNumber
-    if (args.zeros or args.random) and number > sys.maxint:
+    if (args.zeros or args.random) and number > sys.maxint and args.numeric:
         locale.setlocale(locale.LC_NUMERIC, '')
         parser.exit(status=3, message="When using -n/--numeric, together with -z/--zeros or -r/--random, number must be less or equal " + locale.format("%d", sys.maxint, grouping=True))
     if args.numeric or args.random:
         if number > 150000 and (args.zeros or args.random) and not args.force:
             parser.exit(status=4, message="Building and writing the numeric version of such a big number may take a lot of time. " +
                                           "Depending on the size, it my take minutes or longer." + os.linesep +
-                                          "Delete argument -n/--numeric or activate -f/--force, if you know what you are doing.")
+                                          "Delete argument -n/--numeric or activate -F/--force, if you know what you are doing.")
     if args.googolplex and (args.zeros or args.random or args.numeric):
         parser.exit(status=3, message="Sorry... there cannot be ever a computer available, that would be able to print or build a googoleplex digits.")
     if args.googol and args.random:
         parser.exit(status=3, message="I cannot append a googol random digits; no computer will EVER be able to do this.")
+    if args.random and args.loop:
+        parser.error('argument -r/--random: not allowed with argument -l/--loop')
 
     return args
 
 
 def configureLogging(verbose, **_):
-    from logging import basicConfig, ERROR
-    basicConfig(level=verbose or ERROR)
+    from logging.config import dictConfig
+    dictConfig({
+        'version': 1,
+        'formatters': {
+            'brief': {
+                'format': '%(name)s: %(message)s',
+            }
+        },
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'brief',
+            }
+        },
+        'root': {
+            'level': verbose if verbose else 'ERROR',
+            'handlers': ['console', ]
+        }
+    })
 
 
 if __name__ == "__main__":

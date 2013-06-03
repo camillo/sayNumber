@@ -45,8 +45,8 @@ but you will have no problem, finding these information. A good (german) article
 [this](http://de.wikipedia.org/wiki/Zahlennamen) one (wikipedia); or simply read the code :-)
 Find a table for all 999 names at the end of this doc.
 
-That was simple. Both systems take the Latin names for 1 to 999 to create new words for numbers. Short scale takes a
-new word all 3 digits, appending llion. Long scale takes a new word all 6 digits, appending llion or lliard.
+That was easy. Both systems take the Latin names for 1 to 999 to create new words for numbers. Short scale takes a
+new word every 3 digits, appending llion. Long scale takes a new word every 6 digits, appending llion or lliard.
 One exception: if the latin number is > 9 and < 100 and ends with an 'a', it is replaced with an 'i', before appending llion or lliard.
 Some examples:
 
@@ -79,6 +79,9 @@ Some more advanced examples (the `-` delimiter are not part of the 'real' name):
 | 100011 | trestriginti-lli-sestrigintatrecenti-llion | 33 336 | sedezi-lli-oktosexagintaseszenti-lliard | 16 668 |
 | 987654321 | novemvigintitrecenti-lli-oktodeciducenti-lli-sexcenti-llion | 329 218 106 | quattuorsexagintazenti-lli-novenseszenti-lli-tresquinquaginti-lliard | 164 609 53 |
 
+Use option -d/--delimiter to separate the latin prefixes in your output.
+
+Use option -V/--verbose to see the latin numbers, that are used.
 
 ## Usage
 to see all examples: ./say.py --example
@@ -87,10 +90,10 @@ say.py does also show, how to use the lib. Public functions are `say` and `sayBy
 arguments. Simplest call: ./say.py 94283203948239048209482409283490...2840923432 (--shortScale, if you want the us/uk style)
 
 <pre>
-usage: say.py [-T] [-A] [-H] [-E] [-S] [-M] [-U] [-G] [-GG] [-GGG] [-s] [-ch]
-              [-n] [-N | -sy] [-f] [-V | -VV] [-d [DELIMITER]] [-g]
-              [-fz | -fc] [-fs | -fp] [-b] [-L LOCALE] [-z | -r] [-h] [-e]
-              [-SL] [-v] [-c] [-C]
+usage: say.py [-T] [-A] [-H] [-E] [-S] [-M] [-U] [-G] [-GG] [-GGG] [-s] [-b]
+              [-ch] [-n] [-N | -sy] [-F] [-V | -VV] [-d [DELIMITER]] [-g]
+              [-fz | -fc] [-fs | -fp] [-l] [-nn] [-L LOCALE] [-z | -r]
+              [-f count step] [-h] [-e] [-SL] [-v] [-c] [-C]
               [number]
 
 Write names of (very) big numbers.
@@ -111,11 +114,12 @@ select one of these:
 
 optional arguments:
   -s, --shortScale      use american style: 1 000 000 000 is 1 billion; 1 milliard if not set
+  -b, --bothScales      say both scale types; first long scale, then short scale
   -ch, --chuquet        use old latin prefixes like duodeviginti instead of oktodezi
   -n, --numeric         say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits
   -N, --numericOnly     say the number only in numeric form
   -sy, --synonym        say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion
-  -f, --force           ignore size warnings
+  -F, --force           ignore size warnings
   -V, --verbose         output debug information; very useful to understand how words get build
   -VV, --Verbose        output all debug information; only useful if you hack on the code
 
@@ -127,13 +131,16 @@ output:
   -fc, --forceC         always use c, instead of z
   -fs, --forceSingular  always use singular forms: 5 million instead of 5 millions
   -fp, --forcePlural    always use plural forms: 1 millions instead of 1 million
-  -b, --byLine          write components line by line
+  -l, --byLine          write components line by line
+  -nn, --noNewLine      do not print \n between for loops; only useful with -f/--for
   -L LOCALE, --locale LOCALE
                         locale for formatting numbers; only useful with -g/--grouping (see -SL/--showLocales)
 
 make VERY big numbers:
   -z, --zeros           do not say given number, but the number with that many zeros
   -r, --random          do not say given number, but a random number with that many digits
+  -f count step, --for count step
+                        say <count> numbers; start with <number>, add <step> each iteration; can be combined with -z/--zeros, but not with -r/--random
 
 help:
   -h, --help            show this help message and exit
