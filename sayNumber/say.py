@@ -243,7 +243,8 @@ def main(args, looping=True):
         zeros, zerosLeft = divmod(number, 3)
         zeros *= 3
         ret = "1" + "0" * zerosLeft + " "
-        ret += sayByExp(zeros, zerosLeft, **args.__dict__)
+        plural = args.forcePlural or (zerosLeft and not args.forceSingular)
+        ret += sayByExp(zeros, plural, **args.__dict__)
 
         numeric = "1" + "0" * number if args.numeric else None
     elif args.random:
@@ -397,6 +398,7 @@ def parseCommandlineArguments():
 
 
 def configureLogging(verbose, **_):
+    """ Configure logging; if level is not set in args (-V/-VV), use ERROR. """
     from logging.config import dictConfig
     dictConfig({
         'version': 1,
@@ -419,10 +421,11 @@ def configureLogging(verbose, **_):
 
 
 if __name__ == "__main__":
+    """ This is where the magic starts """
     args = parseCommandlineArguments()
+    configureLogging(**args.__dict__)
+    locale.setlocale(locale.LC_NUMERIC, args.locale[0] if args.locale else '')
     try:
-        configureLogging(**args.__dict__)
-        locale.setlocale(locale.LC_NUMERIC, args.locale[0] if args.locale else '')
         main(args)
     except ValueError as ex:
         print ex.message
