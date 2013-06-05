@@ -3,10 +3,45 @@
 # https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
 
 import os
-import logging
-from latin import sayLatin
+from logging import getLogger
 
-logger = logging.getLogger(__name__)
+latinLogger = getLogger("latin")
+
+
+def _sayLatin(numberToSay, delimiter='', synonym=False, chuquet=False, **_):
+    if not 0 <= numberToSay < 1000:
+        raise ValueError("Number must be 0-999; given: [%s]." % numberToSay)
+
+    from latinNumbers import LATIN_NUMBERS, LATIN_SYNONYMS, CHUQUET_PREFIXES
+    if chuquet and numberToSay in CHUQUET_PREFIXES:
+        latinLogger.debug("using chuquet prefix")
+        target = CHUQUET_PREFIXES[numberToSay]
+    elif synonym and numberToSay in LATIN_SYNONYMS:
+        latinLogger.debug("using synonym")
+        target = LATIN_SYNONYMS[numberToSay]
+    else:
+        latinLogger.debug("using normal latin prefix" + (
+                          "; no chuquet prefix available" if chuquet
+                          else "; no synonym available" if synonym
+                          else ''))
+        target = LATIN_NUMBERS[numberToSay]
+
+    latinLogger.info("%s -> %s", numberToSay, "-".join(target))
+    return delimiter.join(target)
+
+
+def sayLatin(numberToSay, delimiter='', synonym=False, chuquet=False):
+    """
+    Combine the latin prefixes for given number.
+    @param delimiter Separates the used prefixes if set.
+    @param synonym Use sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion.
+    @param chuquet Use old latin prefixes like duodeviginti instead of oktodezi
+    @return Combined prefixes, that can be used to make a word, by appending llion ord lliard.
+    """
+    numberToSay = int(numberToSay)
+    if not 0 < numberToSay < 1000:
+        raise ValueError("Number must be 1-999; given: [%s]." % numberToSay)
+    return _sayLatin(numberToSay, delimiter, synonym, chuquet)
 
 
 def _sayLongScale(zerosAfterOne, plural=False, delimiter='', **kwargs):
@@ -25,7 +60,7 @@ def _sayLongScale(zerosAfterOne, plural=False, delimiter='', **kwargs):
     while sixes > 0:
         # We do one thousand block per iteration, starting with the the lowest value.
         current = sixes % 1000
-        prefix = sayLatin(current, delimiter, **kwargs)
+        prefix = _sayLatin(current, delimiter, **kwargs)
         # If we combine a ten prefix, without a hundred prefix, the 'a' changes to 'i' if present at last position.
         if 100 > current > 9 and prefix[-1] == "a":
             prefix = prefix[:-1] + 'i'
@@ -64,7 +99,6 @@ def sayByExp(zerosAfterOne, plural=False, shortScale=False, forceZ=False, forceC
     Build the word for the number, starting with a 1, followed by as many "0" as specified in zeros.
     @param zerosAfterOne the number of "0", following the "1". Must be 3 at least and zeros % 3 == 0.
     @param plural True, if the plural form should be returned, False for singular.
-    @param delimiter Separates the latin prefixes.
     @param shortScale True, to use us/uk system, german otherwise
     """
     if zerosAfterOne < 3:
@@ -114,16 +148,15 @@ def say(number, byLine=False, forceSingular=False, forcePlural=False, **kwargs):
     ret = ""
     isFirstComponent = True
     for thousandBlock in blocks:
-        thousandValue = int(thousandBlock)
         try:
             if thousandBlock == "000":
                 continue
             if not byLine and not isFirstComponent:
                 ret += " "
+            thousandValue = int(thousandBlock)
             ret += str(thousandValue)
             if blocksLeft > 1:
                 ret += " "
-            if blocksLeft > 1:
                 plural = forcePlural or (thousandValue > 1 and not forceSingular)
                 ret += sayByExp((blocksLeft - 1) * 3, plural=plural, **kwargs)
             if byLine:

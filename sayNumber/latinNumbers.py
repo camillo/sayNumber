@@ -2,8 +2,8 @@
 # This program is free software; find details in file LICENCE or here:
 # https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
 
-# This file is auto generated, running python latin.py.
-# Changes to this file will be overridden without warning, when running latin.py again (will not happen automatically).
+# This file is auto generated, running python buildLatinNumbers.py.
+# Changes to this file will be overridden without warning, when running buildLatinNumbers.py again (will not happen automatically).
 
 # These are valid synonyms, that can be used.
 LATIN_SYNONYMS = {

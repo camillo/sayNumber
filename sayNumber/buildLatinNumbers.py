@@ -1,35 +1,11 @@
 # This program is free software; find details in file LICENCE or here:
 # https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
 
-import string
-from logging import getLogger, INFO
-from latinNumbers import LATIN_NUMBERS, LATIN_SYNONYMS, CHUQUET_PREFIXES
-
-logger = getLogger(__name__)
-
-
-def sayLatin(numberToSay, delimiter='', synonym=False, chuquet=False, **_):
-    if not 0 <= numberToSay < 1000:
-        raise ValueError("Number must be 0-999; given: [%s]." % numberToSay)
-
-    if chuquet and numberToSay in CHUQUET_PREFIXES:
-        logger.debug("using chuquet prefix")
-        target = CHUQUET_PREFIXES[numberToSay]
-    elif synonym and numberToSay in LATIN_SYNONYMS:
-        logger.debug("using synonym")
-        target = LATIN_SYNONYMS[numberToSay]
-    else:
-        logger.debug("using normal latin prefix")
-        target = LATIN_NUMBERS[numberToSay]
-    if logger.isEnabledFor(INFO):
-        logger.info("%s -> %s", numberToSay, "-".join(target))
-    return delimiter.join(target)
-
-
 # *************************************************************************
 # * Following staff is generating the source code of latinNumbers.py.     *
 # * If you want to understand, how the Latin numbers get build, go ahead. *
 
+import string
 # These are the prefixes to build latin numbers.
 LATIN_PREFIXES = [
     # 0: list of one-prefixes, that stands alone (numbers 1-9)
@@ -67,7 +43,6 @@ def _sayLatin(numberToSay, delimiter=''):
         raise ValueError("Number must be 1-999; given: [%s]." % numberToSay)
     if delimiter and delimiter in string.ascii_lowercase:
         raise ValueError("Delimiter must not be a-z.")
-    logger.debug("say latin: %s", numberToSay)
 
     one = numberToSay % 10
     ten = (numberToSay - one) % 100
@@ -102,16 +77,12 @@ def _sayLatin(numberToSay, delimiter=''):
     return combineHundredIfNeeded(ret)
 
 
-if __name__ == "__main__":
-    # If you start this script (python latin.py), the dicts in latinNumbers.py get generated. We do this precalculation
-    # to save time, building REALLY(!) big numbers.
-
+def createSource():
     ret = """# Copyright (C) 2013 Daniel Marohn - daniel.marohn@gmail.com
 # This program is free software; find details in file LICENCE or here:
 # https://raw.github.com/camillo/sayNumber/master/sayNumber/LICENSE
 
-# This file is auto generated, running python latin.py.
-# Changes to this file will be overridden without warning, when running latin.py again (will not happen automatically).
+# This file is auto generated, running python buildLatinNumbers.py.
 
 # These are valid synonyms, that can be used.
 LATIN_SYNONYMS = {
@@ -154,5 +125,18 @@ CHUQUET_PREFIXES = {
         line += "],"
         ret += line + "\r"
     ret += "}"
-    with open('latinNumbers.py', 'w') as sourceCode:
-        sourceCode.write(ret)
+    return ret
+
+
+if __name__ == "__main__":
+    # If you start this script (python buildLatinNumbers.py), the dicts in latinNumbers.py get generated. We do this
+    # precalculation to save time, building REALLY(!) big numbers.
+
+    from argparse import ArgumentParser, FileType
+    import sys
+    parser = ArgumentParser(description="create source for latinNumbers.py")
+    parser.add_argument('-o', '--outfile', nargs='?', type=FileType('w'), default=sys.stdout, const="latinNumbers.py",
+                        help='write to OUTFILE; latinNumbers.py, if stands alone')
+    args = parser.parse_args()
+    source = createSource()
+    args.outfile.write(source)

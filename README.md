@@ -91,14 +91,17 @@ arguments. Simplest call: ./say.py 94283203948239048209482409283490...2840923432
 
 <pre>
 usage: say.py [-T] [-A] [-H] [-E] [-S] [-M] [-U] [-G] [-GG] [-GGG] [-s] [-b]
-              [-ch] [-n] [-N | -sy] [-F] [-V | -VV] [-d [DELIMITER]] [-g]
-              [-fz | -fc] [-fs | -fp] [-l] [-nn] [-L LOCALE] [-z | -r]
-              [-f count step] [-h] [-e] [-SL] [-v] [-c] [-C]
+              [-sy] [-ch] [-n] [-N] [-f count step] [-F] [-V] [-d [DELIMITER]]
+              [-g] [-fz | -fc] [-fs | -fp] [-l] [-nn] [-L LOCALE] [-z | -r]
+              [-VV] [-FS FORMATSTRING] [-h] [-e] [-SL]
+              [-La [LATIN [LATIN ...]]] [-Ch] [-v] [-c] [-C]
               [number]
 
 Write names of (very) big numbers.
 
-select one of these:
+what to say:
+  select one of these
+
   number                say this number
   -T, --time            say the number of seconds the universe exists
   -A, --avogadro        say the avogadro constant; atoms in 12g carbon
@@ -112,18 +115,25 @@ select one of these:
   -GGG, --googolplexplex
                         say a googolplexplex (10^googolplex)
 
-optional arguments:
+how to say:
+  us or eu style, synonyms ...
+
   -s, --shortScale      use american style: 1 000 000 000 is 1 billion; 1 milliard if not set
   -b, --bothScales      say both scale types; first long scale, then short scale
+  -sy, --synonym        say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion
   -ch, --chuquet        use old latin prefixes like duodeviginti instead of oktodezi
   -n, --numeric         say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits
   -N, --numericOnly     say the number only in numeric form
-  -sy, --synonym        say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion
+
+optional arguments:
+  -f count step, --for count step
+                        say <count> numbers; start with <number>, add <step> each iteration; can be combined with -z/--zeros, but not with -r/--random
   -F, --force           ignore size warnings
   -V, --verbose         output debug information; very useful to understand how words get build
-  -VV, --Verbose        output all debug information; only useful if you hack on the code
 
 output:
+  use these to format your output
+
   -d [DELIMITER], --delimiter [DELIMITER]
                         separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the words get build
   -g, --grouping        group thousand blocks; implicit using -n
@@ -137,15 +147,25 @@ output:
                         locale for formatting numbers; only useful with -g/--grouping (see -SL/--showLocales)
 
 make VERY big numbers:
-  -z, --zeros           do not say given number, but the number with that many zeros
-  -r, --random          do not say given number, but a random number with that many digits
-  -f count step, --for count step
-                        say <count> numbers; start with <number>, add <step> each iteration; can be combined with -z/--zeros, but not with -r/--random
+  do not say given number, but
+
+  -z, --zeros           the number with that many zeros
+  -r, --random          a random number with that many digits
+
+hacking:
+  these options are only useful for development
+
+  -VV, --Verbose        output all debug information
+  -FS FORMATSTRING, --formatString FORMATSTRING
+                        use this python logging format string
 
 help:
   -h, --help            show this help message and exit
   -e, --example         show examples and exit
   -SL, --showLocales    show available locales and exit
+  -La [LATIN [LATIN ...]], --Latin [LATIN [LATIN ...]]
+                        say the latin prefixes for given numbers (from 1 to 999) and exit; allowed forms: 17-35 5 974; use 1-999 if stands alone
+  -Ch, --Chuquet        say all chuquet prefixes and exit
   -v, --version         show program's version number and exit
   -c, --licence         show licence information and exit
   -C, --fullLicence     show licence file and exit; tries to download and save licence, if not available

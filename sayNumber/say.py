@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from backend import sayLatin
 
 COPYRIGHT = "Copyright (C) 2013 Daniel Marohn - daniel.marohn@gmail.com"
 # This program is free software; find details in file LICENCE or here:
@@ -34,6 +35,35 @@ class MessageAction(argparse._HelpAction):
 
     def message(self):
         raise NotImplementedError("Abstract method; needs to get overridden.")
+
+
+class SayLatinAction(argparse.Action):
+    """ Write the specified latin numbers (the combined prefixes) and exi. """
+    def __call__(self, parser, namespace, values, option_string=None):
+        numbers = []
+        values = ['1-999'] if not values else values
+        try:
+            for value in values:
+                if "-" in value:
+                    fromTo = value.split("-")
+                    if not len(fromTo) == 2:
+                        raise ValueError("Only one '-' is allowed per argument")
+                    for number in range(int(fromTo[0]), int(fromTo[1]) + 1):
+                        if not number in numbers:
+                            numbers.append(number)
+                elif not int(value) in numbers:
+                    numbers.append(int(value))
+
+            parser.exit(message=os.linesep.join(['%d: %s' % (number, sayLatin(number, '-')) for number in sorted(numbers)]))
+        except ValueError as ex:
+            parser.error(ex.message)
+
+
+class SayChuquetAction(MessageAction):
+    """ Write all Chuquet prefixes and exit."""
+    def message(self):
+        from latinNumbers import CHUQUET_PREFIXES
+        return os.linesep.join(["%d: %s" % (number, "-".join(prefix)) for number, prefix in CHUQUET_PREFIXES.items()])
 
 
 class ExampleAction(MessageAction):
@@ -193,6 +223,13 @@ class NumericOnlyAction(argparse._StoreTrueAction):
         args.numericOnly = True
 
 
+class VerboseAction(argparse._StoreConstAction):
+    """ Add verbose value only, if not already set by -VV/--Verbose """
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not getattr(namespace, self.dest):
+            setattr(namespace, self.dest, self.const)
+
+
 def atLeastZero(value):
     """ Check that value is numeric and >= 0 """
     try:
@@ -227,53 +264,70 @@ def validLocale(value):
 
 
 def main(args, looping=True):
-    if args.bothScales and args.shortScale:
-        args.shortScale = False
-        main(args, False)
-        args.shortScale = True
-    from backend import say, sayByExp
-    number = args.number
-    if args.googol or args.googolplex:
-        number = NAMED_NUMBERS['googol']
-    elif args.namedNumber:
-        number = args.namedNumber
-    args.number = number
-    if args.zeros or args.googolplex:
-        # Do not say given number, but the number with that many zeros.
-        zeros, zerosLeft = divmod(number, 3)
-        zeros *= 3
-        ret = "1" + "0" * zerosLeft + " "
-        plural = args.forcePlural or (zerosLeft and not args.forceSingular)
-        ret += sayByExp(zeros, plural, **args.__dict__)
-
-        numeric = "1" + "0" * number if args.numeric else None
-    elif args.random:
-        # Do not say given number, but a random number with that many digits.
-        import random
-        digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
-        numeric = random.choice(digits)
-        digits.append('0')
-        numeric += "".join([random.choice(digits) for _ in range(number - 1)])
-        args.number = numeric
-        ret = say(**args.__dict__)
-    else:
-        args.number = number
-        ret = say(**args.__dict__)
-        numeric = number
-    if args.numeric:
-        print locale.format("%d", int(numeric), grouping=args.grouping)
-    if not args.numericOnly:
-        print ret
-    if args.loop and looping:
-        count, step = args.loop
-        args.googol, args.googolplex, args.namedNumber = None, None, None
-
-        while count > 1:
-            if not args.noNewLine:
-                print
-            args.number += step
-            count -= 1
+    def handleBothScales():
+        if args.bothScales and args.shortScale:
+            args.shortScale = False
             main(args, False)
+            args.shortScale = True
+
+    def getNumberToUse():
+        number = args.number
+        if args.googol or args.googolplex:
+            number = NAMED_NUMBERS['googol']
+        elif args.namedNumber:
+            number = args.namedNumber
+        args.number = number
+        return number
+
+    def sayNumber():
+        from backend import say, sayByExp
+        if args.zeros or args.googolplex:
+            # Do not say given number, but the number with that many zeros.
+            zeros, zerosLeft = divmod(number, 3)
+            zeros *= 3
+            ret = "1" + "0" * zerosLeft + " "
+            plural = args.forcePlural or (zerosLeft and not args.forceSingular)
+            ret += sayByExp(zeros, plural, **args.__dict__)
+
+            numeric = "1" + "0" * number if args.numeric else None
+        elif args.random:
+            # Do not say given number, but a random number with that many digits.
+            import random
+            digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+            numeric = random.choice(digits)
+            digits.append('0')
+            numeric += "".join([random.choice(digits) for _ in range(number - 1)])
+            args.number = numeric
+            ret = say(**args.__dict__)
+        else:
+            args.number = number
+            ret = say(**args.__dict__)
+            numeric = number
+        return ret, numeric
+
+    def printResult(ret, numeric):
+        if args.numeric:
+            print locale.format("%d", int(numeric), grouping=args.grouping)
+        if not args.numericOnly:
+            print ret
+
+    def handleLoop():
+        if args.loop and looping:
+            count, step = args.loop
+            args.googol, args.googolplex, args.namedNumber = None, None, None
+
+            while count > 1:
+                if not args.noNewLine:
+                    print
+                args.number += step
+                count -= 1
+                main(args, False)
+
+    handleBothScales()
+    number = getNumberToUse()
+    ret, numeric = sayNumber()
+    printResult(ret, numeric)
+    handleLoop()
 
 
 def createParser():
@@ -283,7 +337,7 @@ def createParser():
                                             "Find more information here: http://de.wikipedia.org/wiki/Zahlennamen",
                                      formatter_class=argparse.RawTextHelpFormatter, add_help=False)
 
-    group = parser.add_argument_group("select one of these").add_mutually_exclusive_group(required=True)
+    group = parser.add_argument_group("what to say", "select one of these").add_mutually_exclusive_group(required=True)
     group.add_argument('number', nargs="?", type=atLeastZero, help='say this number')
     group.add_argument('-T', '--time', action="store_const", const=NAMED_NUMBERS['time'], dest="namedNumber",
                        help='say the number of seconds the universe exists')
@@ -303,29 +357,29 @@ def createParser():
     group.add_argument('-GG', '--googolplex', action="store_true", help='say a googolplex (10^googol)')
     group.add_argument('-GGG', '--googolplexplex', action=GoogolplexplexAction, help='say a googolplexplex (10^googolplex)')
 
-    group = parser.add_argument_group('optional arguments')
+    group = parser.add_argument_group("how to say", "us or eu style, synonyms ...")
     group.add_argument('-s', '--shortScale', dest='shortScale', action="store_true",
                        help='use american style: 1 000 000 000 is 1 billion; 1 milliard if not set')
     group.add_argument('-b', '--bothScales', dest='bothScales', action=BothScalesAction,
                        help='say both scale types; first long scale, then short scale')
+    group.add_argument('-sy', '--synonym', dest='synonym', action='store_true',
+                       help='say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion')
     group.add_argument('-ch', '--chuquet', dest='chuquet', action='store_true',
                        help='use old latin prefixes like duodeviginti instead of oktodezi')
     group.add_argument('-n', '--numeric', dest='numeric', action='store_true',
                        help="say the number also in numeric form; it is not recommended to use this option with more than 1 000 000 digits")
-    innerGroup = group.add_mutually_exclusive_group()
-    innerGroup.add_argument('-N', '--numericOnly', dest='numericOnly', action=NumericOnlyAction,
+    group.add_argument('-N', '--numericOnly', dest='numericOnly', action=NumericOnlyAction,
                             help="say the number only in numeric form")
-    innerGroup.add_argument('-sy', '--synonym', dest='synonym', action='store_true',
-                            help='say sexdezillion, novemdezillion and quinquillion for sedezillion, novendezillion and quintillion')
+
+    group = parser.add_argument_group('optional arguments')
+    group.add_argument('-f', '--for', nargs=2, dest='loop', type=atLeastOne, metavar=('count', 'step'),
+                       help='say <count> numbers; start with <number>, add <step> each iteration; can be combined with -z/--zeros, but not with -r/--random')
     group.add_argument('-F', '--force', dest='force', action='store_true',
                        help="ignore size warnings")
-    innerGroup = group.add_mutually_exclusive_group()
-    innerGroup.add_argument('-V', '--verbose', dest='verbose', action='store_const', const=INFO,
-                            help="output debug information; very useful to understand how words get build")
-    innerGroup.add_argument('-VV', '--Verbose', dest='verbose', action='store_const', const=DEBUG,
-                            help="output all debug information; only useful if you hack on the code")
+    group.add_argument('-V', '--verbose', dest='verbose', action=VerboseAction, const=INFO,
+                       help="output debug information; very useful to understand how words get build")
 
-    group = parser.add_argument_group('output')
+    group = parser.add_argument_group('output', 'use these to format your output')
     group.add_argument('-d', '--delimiter', nargs="?", const='-', dest='delimiter', default='',
                        help="separate latin prefixes; using '-' if argument stands alone - this is very useful to understand how the words get build")
     group.add_argument('-g', '--grouping', dest='grouping', action=GroupingAction,
@@ -347,14 +401,18 @@ def createParser():
     group.add_argument('-L', '--locale', dest="locale", nargs=1, type=validLocale, default='',
                        help='locale for formatting numbers; only useful with -g/--grouping (see -SL/--showLocales)')
 
-    group = parser.add_argument_group('make VERY big numbers')
+    group = parser.add_argument_group('make VERY big numbers', 'do not say given number, but')
     innerGroup = group.add_mutually_exclusive_group()
     innerGroup.add_argument('-z', '--zeros', dest='zeros', action='store_true',
-                            help='do not say given number, but the number with that many zeros')
+                            help='the number with that many zeros')
     innerGroup.add_argument('-r', '--random', dest='random', action='store_true',
-                            help='do not say given number, but a random number with that many digits')
-    group.add_argument('-f', '--for', nargs=2, dest='loop', type=atLeastOne, metavar=('count', 'step'),
-                       help='say <count> numbers; start with <number>, add <step> each iteration; can be combined with -z/--zeros, but not with -r/--random')
+                            help='a random number with that many digits')
+
+    group = parser.add_argument_group('hacking', 'these options are only useful for development')
+    group.add_argument('-VV', '--Verbose', dest='verbose', action='store_const', const=DEBUG,
+                       help="output all debug information")
+    group.add_argument('-FS', '--formatString', nargs=1, dest='formatString', default=["%(name)s: %(message)s", ],
+                       help='use this python logging format string')
 
     group = parser.add_argument_group('help')
     group.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
@@ -363,6 +421,10 @@ def createParser():
                        help='show examples and exit')
     group.add_argument('-SL', '--showLocales', action=ShowLocalesAction, default=argparse.SUPPRESS,
                        help="show available locales and exit")
+    group.add_argument('-La', '--Latin', nargs="*", action=SayLatinAction, dest='latin', default=argparse.SUPPRESS,
+                       help='say the latin prefixes for given numbers (from 1 to 999) and exit; allowed forms: 17-35 5 974; use 1-999 if stands alone')
+    group.add_argument('-Ch', '--Chuquet', action=SayChuquetAction, dest='chquet' , default=argparse.SUPPRESS,
+                       help='say all chuquet prefixes and exit')
     group.add_argument('-v', '--version', action='version', version=VERSION)
     group.add_argument('-c', '--licence', action=LicenceAction, default=argparse.SUPPRESS,
                        help="show licence information and exit")
@@ -397,27 +459,10 @@ def parseCommandlineArguments():
     return args
 
 
-def configureLogging(verbose, **_):
+def configureLogging(verbose, formatString, **_):
     """ Configure logging; if level is not set in args (-V/-VV), use ERROR. """
-    from logging.config import dictConfig
-    dictConfig({
-        'version': 1,
-        'formatters': {
-            'brief': {
-                'format': '%(name)s: %(message)s',
-            }
-        },
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-                'formatter': 'brief',
-            }
-        },
-        'root': {
-            'level': verbose if verbose else 'ERROR',
-            'handlers': ['console', ]
-        }
-    })
+    from logging import basicConfig, ERROR
+    basicConfig(level=verbose if verbose else ERROR, format=formatString[0])
 
 
 if __name__ == "__main__":
